@@ -1,0 +1,7 @@
+base   fksimageshow
+author Michal Červeňák
+email  miso@fykos.cz
+date   2014-03-16
+name   fksimageshow plugin
+desc   FIXME
+url    FIXME
