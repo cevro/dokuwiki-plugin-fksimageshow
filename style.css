@@ -1,0 +1,28 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Nov 30, 2014, 2:50:38 PM
+    Author     : miso
+*/
+
+/*
+   * fks_image_show
+   *TODO !!!!!!!!!!!!!!!!!!!!!!!
+   */
+div.fks_images{
+
+}
+
+div.fks_images a img{
+    position: relative;
+    top:0%;
+}
+div.fks_images a{
+    height: 150px;
+    overflow: hidden;
+    display: block;
+}
+
