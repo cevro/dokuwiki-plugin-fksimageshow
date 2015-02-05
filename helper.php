@@ -11,35 +11,17 @@ if (!defined('DOKU_INC')) {
 
 class helper_plugin_fksimageshow extends DokuWiki_Plugin {
 
-    function getimages($files, $format) {
-        if (!$files) {
-            return null;
-        }
-        $rand = rand(0, count($files) - 1);
-        $imegesize = getimagesize($files[$rand]);
-        if ($format == 'landscape') {
-            if ($imegesize[0] < $imegesize[1]) {
-                $rand = $this->getimages($files, $format);
-            }
-        } elseif ($format == 'portrait') {
-            if ($imegesize[0] > $imegesize[1]) {
-                $rand = $this->getimages($files, $format);
-            }
-        }
-        return $rand;
+    public $FKS_helper;
+
+    public function __construct() {
+
+
+        $this->FKS_helper = $this->loadHelper('fkshelper');
     }
 
-    function getRand() {
+   
 
-        $seed = str_split('abcdefghijklmnopqrstuvwxyz'
-                . 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'); // and any other characters
-        shuffle($seed); // probably optional since array_is randomized; this may be redundant
-        $rand = '';
-        foreach (array_rand($seed, 5) as $k) {
-            $rand .= $seed[$k];
-        }
-        return $rand;
-    }
+   
 
     function resizeImage($image) {
         list($w, $h) = getimagesize($image);
@@ -50,59 +32,9 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
         return $size;
     }
 
-    function getData($match) {
-        global $userdata;
-        $parsedata = preg_split('/\|/', str_replace(' ', '', substr($match, 15, -2)));
-        foreach ($parsedata as $key) {
-            $simpledata = preg_split("/=/", $key);
-            $userdata[$simpledata[0]] = $simpledata[1];
-        }
-    }
+    
 
-    function getAllFiles() {
-        global $userdata;
-        if (!isset($userdata["url"])) {
-            $dirs = $this->getConf('dirs');
-            $dir = preg_split('/;/', $dirs);
-            $files = Array();
-            foreach ($dir as $key) {
-                $filesnew = glob('data/media/' . $key . '/*.jpg');
-                $files = array_merge($files, $filesnew);
-            }
-        } else {
-            $files = glob('data/media/galerie/' . $userdata["url"] . '/*.jpg');
-        }
-        return $files;
-    }
-
-    function getPrezImg() {
-        global $userdata;
-        global $files;
-        for ($i = 0; $i < $userdata['foto']; $i++) {
-            $images[$i] = $this->getimages($files, $userdata['format']);
-        }
-        return $images;
-    }
-
-    function getImageScript() {
-        global $files;
-        global $userdata;
-        global $rand;
-        global $images;
-
-        $no = 0;
-        $script = '<script> files["' . $rand . '"]={"images":' . $userdata['foto'];
-        foreach ($images as $key) {
-            $hrefs = preg_split('/\//', $files[$key]);
-            $script.='
-                    ,' . $no . ':{
-                    "href":"' . DOKU_BASE . $hrefs[2] . '/' . $hrefs[3] . '/page",
-                    "src":"' . DOKU_BASE . '_media' . substr($files[$key], 10) . '"}';
-            $no++;
-        }
-        $script.='}</script>';
-        return $script;
-    }
+    
 
 }
 
@@ -113,53 +45,59 @@ class fksimage extends helper_plugin_fksimageshow {
      * @var string path to style.ini
      */
     private $ini_file;
+
     /**
      *
      * @var int filetime style.ini
      */
     private $ini_time;
+
     /**
      *
      * @var array params of style.ini
      */
     private $ini_atr = array();
-    
+
     /**
-     *@var string name od season
+     * @var string name od season
      */
     public $season_name;
+
     /**
      *
      * @var string folder to save images
      */
     private $season_dir;
+
     /**
      *
      * @var string folder to default files
      */
     public $default_dir;
+
     /**
      *
      * @var string path of defaul file
      */
     private $default_file;
 
-
-
-/**
- *
- * @var int filetime of new file
- */
+    /**
+     *
+     * @var int filetime of new file
+     */
     private $file_time;
+
     /**
      * @var string path of new file
      */
     private $file_patch;
+
     /**
      *
      * @var string name of file
      */
     private $file_name;
+
     /**
      *
      * @var string type of file

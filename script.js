@@ -70,7 +70,7 @@ function downopacity(elm, show, rand, images) {
 }
 ;
 jQuery(function() {
-    jQuery('div.fks_image_show').each(function() {
+    jQuery('div.fks_image_show[data-animate=slide]').each(function() {
 
         imageshow(this.id);
     });
