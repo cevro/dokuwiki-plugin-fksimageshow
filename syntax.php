@@ -20,7 +20,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     public function getPType() {
-        return 'normal';
+        return 'block';
     }
 
     public function getAllowedTypes() {
@@ -46,13 +46,14 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             /**
              * find all allow gallery
              */
-            $gallerys = $this->getAllGallery($params);
-
+            if (!isset($params["url"])) {
+                $gallerys = $this->getAllGallery($params);
+                $rand = rand(0, count($gallerys) - 1);
+                $params['url'] = $gallerys[$rand];
+            }
             /**
              * select randomly gallery
              */
-            $rand = rand(0, count($gallerys) - 1);
-            $params['url'] = $gallerys[$rand];
         } else {
 
             $params['rand'] = $this->helper->FKS_helper->_generate_rand(5);
@@ -69,36 +70,33 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         }
 
         $images['script'] = $this->getImageScript($images, $params);     //echo $script;
-        return array($state, array($images, $params));
+        return array($state, array(array($images, $params)));
     }
 
     public function render($mode, Doku_Renderer &$renderer, $data) {
-// $data is what the function handle return'ed.
+
         if ($mode == 'xhtml') {
             /** @var Do ku_Renderer_xhtml $renderer */
-            list($state, $match) = $data;
+            list($state, $matches) = $data;
+            list($match)=$matches;
             list($images, $params) = $match;
+            
             if (array_key_exists('static', $params)) {
-                
-                $renderer->doc .='<div class="fks_image_show" data-animate="static" >';
+
+                $renderer->doc .='<div class="FKS_image_show" data-animate="static" >';
                 foreach ($images['file']as $value) {
-                    $renderer->doc .='<div class="FKS_image">'
-                            . '<a href="'.$this->get_gallery_link($value).'">'
-                            . '<img src="' . $this->get_media_link($value) . '">'
-                            . '</a></div>';
+                    $renderer->doc .='<div class="FKS_images">'
+                            . '<a href="' . $this->get_gallery_link($value) . '">'
+                            . '<div class="FKS_image" style=" background-image:url(\'' . $this->get_media_link($value) . '\');">'
+                            . '</div></a></div>';
                 }
                 $renderer->doc .='</div>';
             } else {
                 $to_page.= $images['script'];
-                $to_page.='<div class="fks_image_show" data-animate="slide" id="' . $params['rand'] . '">'
-                        . '<div id="fks_images' . $params['rand'] . '" class="fks_images" style="display: none;opacity:1;">'
-                        . '<a id="fks_image_url' . $params['rand'] . '" href=" ">'
-                        . '<img '
-                        . 'id="fks_image' . $params['rand'] . '" '
-                        . 'src=" " '
-                        . 'width="95%" '
-                        . 'style="left: 0%; top: -30%;">'
-                        . '</a></div>';
+                $to_page.='<div class="FKS_image_show" data-animate="slide" data-rand="' . $params['rand'] . '">'
+                        . '<div class="FKS_images">'
+                        . '<a href=" ">'
+                        . '<div class="FKS_image" style="opacity:0"></div></a></div>';
 
 
                 $to_page.='</div>';
@@ -160,11 +158,11 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         $no = 0;
         $script = '<script> files["' . $params['rand'] . '"]={"images":' . $params['foto'];
         foreach ($images['file'] as $value) {
-            
+
 
             $script.='
                     ,' . $no . ':{
-                    "href":"' . $this->get_gallery_link($value).'",
+                    "href":"' . $this->get_gallery_link($value) . '",
                     "src":"' . $this->get_media_link($value) . '"}';
             $no++;
         }
@@ -187,7 +185,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
     private function get_gallery_link($link) {
         $path = pathinfo($link);
-        
+
         return str_replace('/data/media', '', DOKU_BASE . $path['dirname'] . '/page');
     }
 
