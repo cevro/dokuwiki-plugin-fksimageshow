@@ -83,28 +83,51 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             list($state, $matches) = $data;
             list($match) = $matches;
             list($images, $params) = $match;
+            $atr = array();
+            $atr['div1'] = array('class' => 'FKS_image_show');
+            $atr['div']['default'] = array('class' => 'FKS_images');
+            $atr['a']['default'] = array('href' => ' ');
+            $atr['img']['default'] = array('class' => 'FKS_image', 'src' => ' ', 'alt' => 'foto');
 
 
             if (array_key_exists('static', $params)) {
 
-                $renderer->doc .='<div class="FKS_image_show" data-animate="static" >';
+
+                $atr['div1']['data-animate'] = 'static';
                 foreach ($images['file']as $value) {
-                    $renderer->doc .='<div class="FKS_images">'
-                            . '<a href="' . $this->get_gallery_link($value) . '">'
-                            . '<div class="FKS_image" style=" background-image:url(\'' . $this->get_media_link($value) . '\');">'
-                            . '</div></a></div>';
+                    $atr['a'][]['href'] = $this->get_gallery_link($value);
+                    $atr['img'][]['src'] = $this->get_media_link($value);
                 }
-                $renderer->doc .='</div>';
             } else {
                 $to_page.= $images['script'];
-                $to_page.='<div class="FKS_image_show" data-animate="slide" data-rand="' . $params['rand'] . '">'
-                        . '<div class="FKS_images">'
-                        . '<a href=" ">'
-                        . '<div class="FKS_image" style="opacity:0"></div></a></div>';
-
-
-                $to_page.='</div>';
+                $atr['div1']['data-animate'] = 'slide';
+                $atr['div1']['data-rand'] = $params['rand'];
+                $atr['img'][]['style'] = 'opacity:0';
             }
+
+             $to_page.='<div ' . buildAttributes($atr['div1']) . '">' ;
+            foreach ($atr['img'] as $key => $value) {
+                if ($key !== 'default') {
+                    foreach (array('div', 'a', 'img')as $v) {
+                        if (array_key_exists($key, $atr[$v])) {
+                            $param = array_merge($atr[$v]['default'], $atr[$v][$key]);
+                        } else {
+                            $param = $atr[$v]['default'];
+                        }
+                        $to_page.='<' . $v . ' ' . buildAttributes($param);
+                        if ($v == 'img') {
+                             $to_page.='/>';
+                        } else {
+                             $to_page.='>';
+                        }
+                    }
+                     $to_page.='</a></div>
+                            ';
+                }
+            }
+           
+
+           $to_page.='</div>';
 
             $renderer->doc .= $to_page;
         }
