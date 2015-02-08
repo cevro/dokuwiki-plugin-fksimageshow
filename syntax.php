@@ -119,20 +119,12 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $files = Array();
             foreach ($dir as $key) {
                 $dir = 'data/media/' . $key;
-                $filess = helper_plugin_fkshelper::filefromdir($dir);
-
-
+                $filess = $this->allImage($dir);
                 $files = array_merge($files, $filess);
             }
         } else {
-            
-            $dir = DOKU_INC.'data/media/' . $param['url'];
-            $files = helper_plugin_fkshelper::filefromdir($dir);
-            array_filter($files, function($v) {
-                
-                return is_array(@getimagesize($v));
-            });
-            
+            $dir = 'data/media/' . $param['url'];
+            $files = $this->allImage($dir);
         }
         return $files;
     }
@@ -194,15 +186,25 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     private function get_media_link($link) {
-        
-        return DOKU_BASE . '_media/' . str_replace(array('data/media',DOKU_INC,'../../..'),array('','','../..'),$link);
+
+        return DOKU_BASE . '_media/' . str_replace('data/media', '', $link);
     }
 
     private function get_gallery_link($link) {
+        if (!$this->getConf('allow_url')) {
+            return ' ';
+        }
         $path = pathinfo($link);
-        
+        return str_replace('/data/media', '', DOKU_BASE . $path['dirname'] . $this->getConf('gallery_page'));
+    }
 
-        return str_replace('/data/media', '', DOKU_BASE . $path['dirname'] . '/page');
+    private function allImage($dir) {
+        $files = helper_plugin_fkshelper::filefromdir($dir);
+        array_filter($files, function($v) {
+
+            return is_array(@getimagesize($v));
+        });
+        return $files;
     }
 
 }

@@ -5,5 +5,8 @@
  * @author Michal Koutný <michal@fykos.cz>
  */
 
-$conf['dirs'] = "*/*";
+$conf['gallerys'] = "*/*";
+$conf['gallery_page']='/page';
+$conf['allow_url']=1;
+//$conf[]
 
