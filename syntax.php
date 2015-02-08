@@ -42,6 +42,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
 
         $params = helper_plugin_fkshelper::extractParamtext(substr($match, 15, -2));
+
         if (array_key_exists('static', $params)) {
             /**
              * find all allow gallery
@@ -51,6 +52,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                 $rand = rand(0, count($gallerys) - 1);
                 $params['url'] = $gallerys[$rand];
             }
+
             /**
              * select randomly gallery
              */
@@ -63,6 +65,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
          * and find all files
          */
         $params['files'] = $this->getAllFiles($params);
+
         $images['rand'] = $this->choose_images($params);
 
         foreach ($images['rand'] as $key => $value) {
@@ -78,9 +81,10 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         if ($mode == 'xhtml') {
             /** @var Do ku_Renderer_xhtml $renderer */
             list($state, $matches) = $data;
-            list($match)=$matches;
+            list($match) = $matches;
             list($images, $params) = $match;
-            
+
+
             if (array_key_exists('static', $params)) {
 
                 $renderer->doc .='<div class="FKS_image_show" data-animate="static" >';
@@ -114,11 +118,21 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $dir = preg_split('/;/', $dirs);
             $files = Array();
             foreach ($dir as $key) {
-                $filesnew = glob('data/media/' . $key . '/*.jpg');
-                $files = array_merge($files, $filesnew);
+                $dir = 'data/media/' . $key;
+                $filess = helper_plugin_fkshelper::filefromdir($dir);
+
+
+                $files = array_merge($files, $filess);
             }
         } else {
-            $files = glob('data/media/' . $param["url"] . '/*.jpg');
+            
+            $dir = DOKU_INC.'data/media/' . $param['url'];
+            $files = helper_plugin_fkshelper::filefromdir($dir);
+            array_filter($files, function($v) {
+                
+                return is_array(@getimagesize($v));
+            });
+            
         }
         return $files;
     }
@@ -180,11 +194,13 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     private function get_media_link($link) {
-        return DOKU_BASE . '_media/' . substr($link, 10);
+        
+        return DOKU_BASE . '_media/' . str_replace(array('data/media',DOKU_INC,'../../..'),array('','','../..'),$link);
     }
 
     private function get_gallery_link($link) {
         $path = pathinfo($link);
+        
 
         return str_replace('/data/media', '', DOKU_BASE . $path['dirname'] . '/page');
     }
