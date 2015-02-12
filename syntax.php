@@ -42,6 +42,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
 
         $params = helper_plugin_fkshelper::extractParamtext(substr($match, 15, -2));
+
         if (array_key_exists('static', $params)) {
             /**
              * find all allow gallery
@@ -58,17 +59,14 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
             $params['rand'] = $this->helper->FKS_helper->_generate_rand(5);
         }
-
         /*
          * and find all files
          */
         $params['files'] = $this->getAllFiles($params);
-        $images['rand'] = $this->choose_images($params);
-
+        $images['rand'] = self::choose_images($params);
         foreach ($images['rand'] as $key => $value) {
             $images['file'][$key] = $params['files'][$value];
         }
-
         $images['script'] = $this->getImageScript($images, $params);     //echo $script;
         return array($state, array(array($images, $params)));
     }
@@ -78,30 +76,52 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         if ($mode == 'xhtml') {
             /** @var Do ku_Renderer_xhtml $renderer */
             list($state, $matches) = $data;
-            list($match)=$matches;
+            list($match) = $matches;
             list($images, $params) = $match;
-            
-            if (array_key_exists('static', $params)) {
+            $atr = array();
+            $atr['div1'] = array('class' => 'FKS_image_show');
+            $atr['div']['default'] = array('class' => 'FKS_images');
+            $atr['a']['default'] = array('href' => ' ');
+            $atr['img']['default'] = array('class' => 'FKS_image', 'src' => ' ', 'alt' => 'foto');
 
-                $renderer->doc .='<div class="FKS_image_show" data-animate="static" >';
+
+            if (array_key_exists('static', $params)) {
+                /**
+                 * @TODO dorobiť pridavanie style a dalšíc atr;
+                 */
+                $atr['div1']['data-animate'] = 'static';
                 foreach ($images['file']as $value) {
-                    $renderer->doc .='<div class="FKS_images">'
-                            . '<a href="' . $this->get_gallery_link($value) . '">'
-                            . '<div class="FKS_image" style=" background-image:url(\'' . $this->get_media_link($value) . '\');">'
-                            . '</div></a></div>';
+                    $atr['a'][]['href'] = $this->get_gallery_link($value);
+                    $atr['img'][]['src'] = self::get_media_link($value);
                 }
-                $renderer->doc .='</div>';
             } else {
                 $to_page.= $images['script'];
-                $to_page.='<div class="FKS_image_show" data-animate="slide" data-rand="' . $params['rand'] . '">'
-                        . '<div class="FKS_images">'
-                        . '<a href=" ">'
-                        . '<div class="FKS_image" style="opacity:0"></div></a></div>';
-
-
-                $to_page.='</div>';
+                $atr['div1']['data-animate'] = 'slide';
+                $atr['div1']['data-rand'] = $params['rand'];
+                $atr['img'][]['style'] = 'opacity:0';
             }
 
+            $to_page.='<div ' . buildAttributes($atr['div1']) . '">';
+            foreach ($atr['img'] as $key => $value) {
+                if ($key !== 'default') {
+                    foreach (array('div', 'a', 'img')as $v) {
+                        if (array_key_exists($key, $atr[$v])) {
+                            $param = array_merge($atr[$v]['default'], $atr[$v][$key]);
+                        } else {
+                            $param = $atr[$v]['default'];
+                        }
+                        $to_page.='<' . $v . ' ' . buildAttributes($param);
+                        if ($v == 'img') {
+                            $to_page.='/>';
+                        } else {
+                            $to_page.='>';
+                        }
+                    }
+                    $to_page.='</a></div>
+                            ';
+                }
+            }
+            $to_page.='</div>';
             $renderer->doc .= $to_page;
         }
         return false;
@@ -110,28 +130,29 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     private function getAllFiles($param = array()) {
 
         if (!isset($param["url"])) {
-            $dirs = $this->getConf('dirs');
-            $dir = preg_split('/;/', $dirs);
+            $dir = $this->getAllGallery();
             $files = Array();
             foreach ($dir as $key) {
-                $filesnew = glob('data/media/' . $key . '/*.jpg');
-                $files = array_merge($files, $filesnew);
+                $dir = 'data/media/' . $key;
+                $filess = self::allImage($dir);
+                $files = array_merge($files, $filess);
             }
         } else {
-            $files = glob('data/media/' . $param["url"] . '/*.jpg');
+            $dir = 'data/media/' . $param['url'];
+            $files = self::allImage($dir);
         }
         return $files;
     }
 
-    private function choose_images($params = array()) {
+    private static function choose_images($params = array()) {
 
         for ($i = 0; $i < $params['foto']; $i++) {
-            $images[$i] = $this->get_image($params);
+            $images[$i] = self::get_image($params);
         }
         return $images;
     }
 
-    private function get_image($params) {
+    private static function get_image($params) {
 
         if (!$params['files']) {
             return null;
@@ -140,11 +161,11 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         $imegesize = getimagesize($params['files'][$rand]);
         if ($params['format'] == 'landscape') {
             if ($imegesize[0] < $imegesize[1]) {
-                $rand = $this->get_image($params);
+                $rand = self::get_image($params);
             }
         } elseif ($params['format'] == 'portrait') {
             if ($imegesize[0] > $imegesize[1]) {
-                $rand = $this->get_image($params);
+                $rand = self::get_image($params);
             }
         }
         return $rand;
@@ -154,16 +175,13 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         if (array_key_exists('static', $params)) {
             return;
         }
-
         $no = 0;
         $script = '<script> files["' . $params['rand'] . '"]={"images":' . $params['foto'];
         foreach ($images['file'] as $value) {
-
-
             $script.='
                     ,' . $no . ':{
                     "href":"' . $this->get_gallery_link($value) . '",
-                    "src":"' . $this->get_media_link($value) . '"}';
+                    "src":"' . self::get_media_link($value) . '"}';
             $no++;
         }
         $script.='}</script>';
@@ -176,17 +194,31 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
      */
     private function getAllGallery() {
         $dirs = $this->getConf('dirs');
-        return (array) preg_split('/;/', $dirs);
+
+        return (array) array_map(function($value) {
+                    return str_replace(array("\n", " "), '', $value);
+                }, explode(';', $dirs));
     }
 
-    private function get_media_link($link) {
-        return DOKU_BASE . '_media/' . substr($link, 10);
+    private static function get_media_link($link) {
+
+        return DOKU_BASE . '_media/' . str_replace('data/media', '', $link);
     }
 
     private function get_gallery_link($link) {
+        if (!$this->getConf('allow_url')) {
+            return ' ';
+        }
         $path = pathinfo($link);
+        return str_replace('/data/media', '', DOKU_BASE . $path['dirname'] . $this->getConf('gallery_page'));
+    }
 
-        return str_replace('/data/media', '', DOKU_BASE . $path['dirname'] . '/page');
+    private static function allImage($dir) {
+        $files = helper_plugin_fkshelper::filefromdir($dir);
+        array_filter($files, function($v) {
+            return is_array(@getimagesize($v));
+        });
+        return $files;
     }
 
 }

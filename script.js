@@ -11,21 +11,22 @@ jQuery(function() {
 
     function _start_slide($div) {
         var rand = $($div).data('rand');
-        var $bg_div = $($div).children().children().children('div');
-        _slide_next($bg_div, rand, 0);
+        var $bg_img = $($div).children().children().children('img');
+        _slide_next($bg_img, rand, 0);
         ;
     }
     ;
-    function _slide_next($bg_div, rand, next) {
+    function _slide_next($bg_img, rand, next) {
         if (next == files[rand]['images']) {
             next = 0;
         }
-        $bg_div.css({"background-image": "url('" + files[rand][next]['src'] + "')"});
-        $bg_div.animate({opacity: 1}, 1000, function() {
+        $bg_img.attr("src",files[rand][next]['src']);
+        
+        $bg_img.animate({opacity: 1}, 1000, function() {
             next++;
             window.setTimeout(function() {
-                $bg_div.animate({opacity: 0}, 1000, function() {
-                    _slide_next($bg_div, rand, next);
+                $bg_img.animate({opacity: 0}, 1000, function() {
+                    _slide_next($bg_img, rand, next);
                 });
             }, 3000);
 

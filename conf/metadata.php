@@ -8,5 +8,7 @@
 
 $meta['dirs'] = array('');
 
+$meta['gallery_page']= array('string');
+$meta['allow_url']=array('onoff');
 
 
