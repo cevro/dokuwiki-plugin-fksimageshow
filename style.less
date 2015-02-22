@@ -11,14 +11,32 @@ and open the template in the editor.
 
 
 div.FKS_images{
-    
+
     padding: 1em;
     a {
-        img{
-           
-            
-            
+        position:relative; 
+
+        img{    
             height: 150px;
+        }
+        div.FKS_image{
+            height: 350px;
+            background-size: cover;
+            background-position-y: 50%;
+        }
+        .FKS_image_title{
+            background-color: __text_alt__;
+            position:absolute; 
+            bottom:0;
+            width: 100%;
+            &:hover{
+                background-color: #ff7800;
+            }
+            h2{
+                color:__background__ !important;
+                padding: .5em;
+                font-size: 200%;
+            }
         }
     }
 }

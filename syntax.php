@@ -59,7 +59,8 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
             $params['rand'] = $this->helper->FKS_helper->_generate_rand(5);
         }
-        /*
+
+        /**
          * and find all files
          */
         $params['files'] = $this->getAllFiles($params);
@@ -78,52 +79,64 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             list($state, $matches) = $data;
             list($match) = $matches;
             list($images, $params) = $match;
-            $atr = array();
-            $atr['div1'] = array('class' => 'FKS_image_show');
-            $atr['div']['default'] = array('class' => 'FKS_images');
-            $atr['a']['default'] = array('href' => ' ');
-            $atr['img']['default'] = array('class' => 'FKS_image', 'src' => ' ', 'alt' => 'foto');
 
-
+            /**
+             * @TODO dorobiť pridavanie style a dalšíc atr;
+             */
+            $param = array('class' => 'FKS_image_show');
             if (array_key_exists('static', $params)) {
-                /**
-                 * @TODO dorobiť pridavanie style a dalšíc atr;
-                 */
-                $atr['div1']['data-animate'] = 'static';
+                $param = array_merge($param, array('data-animate' => 'static'));
+            } else {
+                $param = array_merge($param, array('data-animate' => 'slide', 'data-rand' => $params['rand']));
+                $renderer->doc.=$images['script'];
+            }
+            $renderer->doc .= html_open_tag('div', $param);
+            /**
+             * iné pre statické a iné pre slide
+             */
+            if (array_key_exists('static', $params)) {
+
                 foreach ($images['file']as $value) {
-                    $atr['a'][]['href'] = $this->get_gallery_link($value);
-                    $atr['img'][]['src'] = self::get_media_link($value);
+                    $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
+                    $renderer->doc .= html_open_tag('a', array('href' => $this->get_gallery_link($value)));
+
+                    
+                    if (!empty($params['label'])) {
+                        $renderer->doc.=html_open_tag('div', array('class' => 'FKS_image','style'=>'background-image: url(\''.self::get_media_link($value).'\')'));
+                         
+                        $renderer->doc .= html_make_tag('div', array('class' => 'FKS_image_title'));
+                        $renderer->doc .= html_make_tag('h2', array());
+                        $renderer->doc .=$params['label'];
+                        
+                        $renderer->doc .=html_close_tag('h2');
+                        $renderer->doc .=html_close_tag('div');
+                        $renderer->doc .=html_close_tag('div');
+                    }else{
+                        $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'src' => ' ', 'alt' => 'foto', 'src' => self::get_media_link($value)));
+                    }
+
+                    $renderer->doc .=html_close_tag('a');
+                    $renderer->doc .=html_close_tag('div');
                 }
             } else {
-                $to_page.= $images['script'];
-                $atr['div1']['data-animate'] = 'slide';
-                $atr['div1']['data-rand'] = $params['rand'];
-                $atr['img'][]['style'] = 'opacity:0';
-            }
 
-            $to_page.='<div ' . buildAttributes($atr['div1']) . '">';
-            foreach ($atr['img'] as $key => $value) {
-                if ($key !== 'default') {
-                    foreach (array('div', 'a', 'img')as $v) {
-                        if (array_key_exists($key, $atr[$v])) {
-                            $param = array_merge($atr[$v]['default'], $atr[$v][$key]);
-                        } else {
-                            $param = $atr[$v]['default'];
-                        }
-                        $to_page.='<' . $v . ' ' . buildAttributes($param);
-                        if ($v == 'img') {
-                            $to_page.='/>';
-                        } else {
-                            $to_page.='>';
-                        }
-                    }
-                    $to_page.='</a></div>
-                            ';
-                }
+                $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
+                $renderer->doc .= html_open_tag('a', array());
+
+                $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'style' => 'opacity:0', 'alt' => 'foto'));
+
+                $renderer->doc .=html_close_tag('a');
+                $renderer->doc .=html_close_tag('div');
             }
-            $to_page.='</div>';
-            $renderer->doc .= $to_page;
         }
+
+
+        //$to_page.='<div ' . buildAttributes($atr['div1']) . '">';
+
+
+
+        $renderer->doc .=html_close_tag('div');
+
         return false;
     }
 
@@ -133,12 +146,12 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $dir = $this->getAllGallery();
             $files = Array();
             foreach ($dir as $key) {
-                $dir = 'data/media/' . $key;
+                $dir = DOKU_INC.'data/media/' . $key;
                 $filess = self::allImage($dir);
                 $files = array_merge($files, $filess);
             }
         } else {
-            $dir = 'data/media/' . $param['url'];
+            $dir = DOKU_INC.'data/media/' . $param['url'];
             $files = self::allImage($dir);
         }
         return $files;
@@ -202,7 +215,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
     private static function get_media_link($link) {
 
-        return DOKU_BASE . '_media/' . str_replace('data/media', '', $link);
+        return DOKU_BASE . '_media/' . str_replace(array(DOKU_INC,'data/media'), '', $link);
     }
 
     private function get_gallery_link($link) {
@@ -210,7 +223,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             return ' ';
         }
         $path = pathinfo($link);
-        return str_replace('/data/media', '', DOKU_BASE . $path['dirname'] . $this->getConf('gallery_page'));
+        return str_replace(array(DOKU_INC,'data/media'), '', DOKU_BASE . $path['dirname'] . $this->getConf('gallery_page'));
     }
 
     private static function allImage($dir) {

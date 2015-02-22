@@ -156,7 +156,7 @@ class fksimage extends helper_plugin_fksimageshow {
      */
     private $old_alpha;
 
-    public function __construct() {
+    public function __construct($file, $type = null) {
 
         global $conf;
         $this->ini_file = DOKU_INC . 'lib/tpl/' . $conf['template'] . '/style.ini';
@@ -165,15 +165,6 @@ class fksimage extends helper_plugin_fksimageshow {
         $this->season_name = $this->ini_atr['__season__'];
         $this->season_dir = 'lib/tpl/' . $conf['template'] . '/images/season/' . $this->season_name . '/';
         $this->default_dir = 'lib/tpl/' . $conf['template'] . '/images/season/default/';
-    }
-
-    /**
-     * 
-     * @param type $file name of file without ext
-     * @param string $type od file jpg/png
-     * @return void
-     */
-    public function _create($file, $type = null) {
 
         if ($type) {
             $this->file_ext = $type;
@@ -189,7 +180,15 @@ class fksimage extends helper_plugin_fksimageshow {
     }
 
     /**
-     *@return void 
+     * 
+     * @param type $file name of file without ext
+     * @param string $type od file jpg/png
+     * @return void
+     */
+    
+
+    /**
+     * @return void 
      */
     public function _colorize() {
 
@@ -224,8 +223,6 @@ class fksimage extends helper_plugin_fksimageshow {
             $style_rgb = hexdec($this->ini_atr['__vyfuk_head__']);
         }
         $this->_fks_repaint_img($im, $style_rgb);
-
-
         ob_start();
         if ($this->file_ext == "png") {
             imagesavealpha($im, true);
@@ -251,13 +248,9 @@ class fksimage extends helper_plugin_fksimageshow {
      */
     public static function _fks_season_image($file, $type = null, $dis_scan = false) {
         global $conf;
-
-        $image = new fksimage;
-
-        $image->_create($file, $type);
-
+        $image = new fksimage($file, $type);
+        
         $image->_colorize();
-
         if (!$dis_scan) {
             foreach (scandir(DOKU_INC . $image->default_dir) as $value) {
 
@@ -276,6 +269,7 @@ class fksimage extends helper_plugin_fksimageshow {
      * @return void
      */
     private function _fks_repaint_img(&$im, $style_rgb) {
+        
         list($w, $h) = getimagesize($this->default_file);
         $this->color_new = imagecolorsforindex($im, $style_rgb);
         for ($i = 0; $i < $w; $i++) {
@@ -283,8 +277,9 @@ class fksimage extends helper_plugin_fksimageshow {
                 $rgb = imagecolorat($im, $i, $j);
                 $this->color_old = imagecolorsforindex($im, $rgb);
                 foreach (array('red', 'green', 'blue', 'alpha')as $value) {
-                    $this->${"new_" . $value} = $this->color_new[$value];
-                    $this->${"old_" . $value} = $this->color_old[$value];
+                    
+                    $this->{"new_" . $value} = $this->color_new[$value];
+                    $this->{"old_" . $value} = $this->color_old[$value];
                 }
                 if ($this->_can_paint()) {
                     $color = imagecolorallocate($im, $this->new_red, $this->new_green, $this->new_blue);
@@ -300,8 +295,6 @@ class fksimage extends helper_plugin_fksimageshow {
      * @return boolean
      */
     private function _can_paint() {
-
-
         $white = (
                 ($this->old_red != 255) ||
                 ($this->old_green != 255) ||
