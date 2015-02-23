@@ -14,15 +14,13 @@ div.FKS_images{
     padding: 1em;
     a {
 
-        &:hover{             
-            .FKS_image_title{
-                background-color: #ff7800;
-            }
-        }
+
         img{    
             height: 150px;
         }
-        div.FKS_image{
+        .FKS_image{
+
+
             position:relative; 
             height: 350px;
             background-size: cover;
@@ -37,6 +35,11 @@ div.FKS_images{
                     color:__background__ !important;
                     padding: .5em;
                     font-size: 200%;
+                }
+            }
+            &:hover{ 
+                .FKS_image_title{
+                    background-color: #ff7800;
                 }
             }
         }
