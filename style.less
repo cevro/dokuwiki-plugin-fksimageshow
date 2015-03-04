@@ -9,19 +9,25 @@ and open the template in the editor.
 */
 
 
+.FKS_image_show{
+    width:100%;
 
+}
+@media(min-width:600px){
+    .FKS_image_show_mini{
+        width: 50%; 
+        float:left;
+    }
+}
 div.FKS_images{
     padding: 1em;
+
     a {
-
-
-        
         div.FKS_image{
-
-
             position:relative; 
-            height: 350px;
+            height: 300px;
             background-size: cover;
+            background-position-x: 50%;
             background-position-y: 50%;
 
             .FKS_image_title{
@@ -47,4 +53,30 @@ div.FKS_images{
 
     }
 }
+/*
+@media(min-width:600px){
+    div.FKS_images{
+        width:50%;
+        float:left;
+        a {
+            div.FKS_image{
+
+            }
+        }
+    }
+}
+@media(min-width:1200px){
+    div.FKS_images{
+        width:33%;
+        float:left;
+
+        a {
+            div.FKS_image{
+
+            }
+        }
+    }
+}
+*/
+
 

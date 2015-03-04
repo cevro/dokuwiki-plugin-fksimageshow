@@ -91,6 +91,9 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                 $param = array_merge($param, array('data-animate' => 'slide', 'data-rand' => $params['rand']));
                 $renderer->doc.=$images['script'];
             }
+            if(array_key_exists('mini', $params)){
+                $param['class'].=' FKS_image_show_mini';
+            }
             $renderer->doc .= html_open_tag('div', $param);
             /**
              * iné pre statické a iné pre slide
@@ -201,8 +204,8 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     private static function get_media_link($link) {
-
-        return DOKU_BASE . '_media/' . str_replace(array(DOKU_INC, 'data/media'), '', $link);
+        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link));
+       
     }
 
     private function get_gallery_link($link) {
@@ -210,11 +213,12 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             return ' ';
         }
         $path = pathinfo($link);
-        return str_replace(array(DOKU_INC, '/data/media'), '', DOKU_BASE . $path['dirname'] . $this->getConf('gallery_page'));
+        return DOKU_URL.wl(str_replace(array(DOKU_INC, 'data/media'), '', $path['dirname'] . $this->getConf('gallery_page')));
+        
     }
 
     private static function allImage($dir) {
-        $files = helper_plugin_fkshelper::filefromdir($dir);
+        $files = helper_plugin_fkshelper::filefromdir($dir,false);
         array_filter($files, function($v) {
             return is_array(@getimagesize($v));
         });
