@@ -180,7 +180,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             return;
         }
         $no = 0;
-        $script = '<script type="text/javascript" charset="utf-8"> files["' . $params['rand'] . '"]={"images":' . $params['foto'];
+        $script = '<script type="text/javascript"> files["' . $params['rand'] . '"]={"images":' . $params['foto'];
         foreach ($images['file'] as $value) {
             $script.='
                     ,' . $no . ':{
