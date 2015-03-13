@@ -105,8 +105,8 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     $renderer->doc .= html_open_tag('a', array('href' => $this->get_gallery_link($value)));
                     if (!empty($params['label'])) {
                         $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image', 'style' => 'background-image: url(\'' . self::get_media_link($value) . '\')'));
-                        $renderer->doc .= html_make_tag('div', array('class' => 'FKS_image_title'));
-                        $renderer->doc .= html_make_tag('h2', array());
+                        $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image_title'));
+                        $renderer->doc .= html_open_tag('h2', array());
                         $renderer->doc .= $params['label'];
                         $renderer->doc .= html_close_tag('h2');
                         $renderer->doc .= html_close_tag('div');
