@@ -120,7 +120,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             } else {
                 $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
                 $renderer->doc .= html_open_tag('a', array());
-                $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'style' => 'opacity:0', 'src'=>' ','alt' => 'foto'));
+                $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'style' => 'opacity:0', 'src'=>'http://bradsknutson.com/wp-content/uploads/2013/04/page-loader.gif','alt' => 'foto'));
                 $renderer->doc .= html_close_tag('a');
                 $renderer->doc .= html_close_tag('div');
             }
