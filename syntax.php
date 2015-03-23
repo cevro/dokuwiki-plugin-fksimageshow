@@ -42,23 +42,76 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
 
         $params = helper_plugin_fkshelper::extractParamtext(substr($match, 15, -2));
-
-        if (array_key_exists('static', $params)) {
-            /**
-             * find all allow gallery
-             */
-            if (!isset($params["url"])) {
-                $gallerys = $this->getAllGallery($params);
-                $rand = rand(0, count($gallerys) - 1);
-                $params['url'] = $gallerys[$rand];
-            }
-            /**
-             * select randomly gallery
-             */
+        /**
+         * @type static / slide / ?,
+         * @link link to galery
+         * @gallery  path to galery relative from data/media
+         * @path
+         * 
+         * @foto 
+         * @label text 
+         * @random /all/one/??
+         */
+        $data = array();
+        /**
+         * switch by type
+         */
+        if ($params['static']) {
+            $data['type'] = 'static';
+        } elseif ($params['slide']) {
+            $data['type'] = 'slide';
         } else {
-
-            $params['rand'] = $this->helper->FKS_helper->_generate_rand(5);
+            $data['type'] = 'slide';
         }
+
+        /**
+         * for slide muss generate rand
+         */
+        if ($data['type'] == 'slide') {
+            $data['rand'] = $this->helper->FKS_helper->_generate_rand(5);
+        }
+
+        if (isset($params['gallery'])) {
+            /**
+             * is set galleryy
+             */
+            $gallerys[] = $params['gallery'];
+        } else {
+            /**
+             * is not set
+             * find all gallery
+             */
+            $all_gallerys = $this->get_all_gallery($params);
+            if ($params['random'] == 'all') {
+                /**
+                 * all
+                 */
+                $gallerys = $all_gallerys;
+            } else {
+                /**
+                 * one
+                 */
+                $rand = rand(0, count($all_gallerys) - 1);
+                $gallerys[] = $all_gallerys[$rand];
+            }
+        }
+        if (isset($params['foto'])) {
+            $data['foto'] = $params['foto'];
+        } else {
+            $data['foto'] = 1;
+        }
+
+        
+        $images = $this->get_all_images($gallerys);
+
+        $data['images'] = self::choose_images($images);
+
+
+
+        var_dump($data);
+
+
+
 
         /**
          * and find all files
@@ -120,7 +173,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             } else {
                 $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
                 $renderer->doc .= html_open_tag('a', array());
-                $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'style' => 'opacity:0', 'src'=>'http://bradsknutson.com/wp-content/uploads/2013/04/page-loader.gif','alt' => 'foto'));
+                $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'style' => 'opacity:0', 'src' => 'http://bradsknutson.com/wp-content/uploads/2013/04/page-loader.gif', 'alt' => 'foto'));
                 $renderer->doc .= html_close_tag('a');
                 $renderer->doc .= html_close_tag('div');
             }
@@ -188,7 +241,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     "src":"' . self::get_media_link($value) . '"}';
             $no++;
         }
-        $script.='}'.html_close_tag('script');
+        $script.='}' . html_close_tag('script');
         return $script;
     }
 
@@ -205,7 +258,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     private static function get_media_link($link) {
-        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link), array('w' => 300),true,'&');
+        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link), array('w' => 50));
     }
 
     private function get_gallery_link($link) {
@@ -213,8 +266,8 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             return ' ';
         }
         $path = pathinfo($link);
-       
-        return  wl(str_replace(array(DOKU_INC, 'data/media'), '', $path['dirname'] . $this->getConf('gallery_page')));
+
+        return wl(str_replace(array(DOKU_INC, 'data/media'), '', $path['dirname'] . $this->getConf('gallery_page')));
     }
 
     private static function allImage($dir) {
