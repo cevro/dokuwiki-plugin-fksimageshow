@@ -205,7 +205,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     private static function get_media_link($link) {
-        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link), array('w' => 50));
+        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link), array('w' => 300),true,'&');
     }
 
     private function get_gallery_link($link) {
