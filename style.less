@@ -9,6 +9,10 @@ and open the template in the editor.
 */
 
 
+/**
+* define width of elements
+*/
+
 .FKS_image_show{
     width:100%;
 
@@ -22,58 +26,50 @@ and open the template in the editor.
 }
 
 
+
+
+
 .FKS_image_show_mini{
+    &:nth-child(even){
+        .FKS_images{
+            margin-left: .5em;
+        }
 
-
-
-    width: 50%; 
-    &:nth-child(odd){
-        padding-right: 0;
     }
 
-    .FKS_image{
-        height: 125px!important;
-    }
 }
 
 
-.FKS_image_show,.FKS_image_show_mini{
-    div.FKS_images{
-        padding:.5em;
+.FKS_images{
+    position:relative; 
+    height: 300px;
+    margin-top:.5em;
 
-        a {
-            .FKS_image{
-                position:relative; 
-                height: 250px;
-                background-size: cover;
-                background-position-x: 50%;
-                background-position-y: 50%;
+    overflow:hidden;
+    .FKS_image{
+        background-size: cover;
+        background-position-y:50%;
+        height: 100%;
+        width: 100%;
 
-                .FKS_image_title{
-                    background-color: __text_alt__;
-                    position:absolute; 
-                    bottom:0;
-                    width: 100%;
-                    h2{
-                        color:__background__ !important;
-                        padding-left: .5em;
-                        padding-right: .5em;
-                        font-size: 200%;
-                    }
-                }
-                &:hover{ 
-                    .FKS_image_title{
-                        background-color: __text_alt_hover__;
-                    }
-                }
-            }
-            img{    
-                // height: 150px;
-            }
-
+    }
+    .FKS_image_title{
+        background-color: __text_alt__;
+        position:absolute; 
+        bottom:0;
+        width: 100%;
+        h2{
+            color:__background__ !important;
+            padding-left: .5em;
+            padding-right: .5em;
+            font-size: 200%;
         }
     }
-
+    &:hover{ 
+        .FKS_image_title{
+            background-color: __text_alt_hover__;
+        }
+    }
 }
 
 

@@ -44,6 +44,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         $params = helper_plugin_fkshelper::extractParamtext(substr($match, 15, -2));
         /**
          * @type static / slide / ?,
+         * @size normal mini;
          * @link link to galery
          * @gallery  path to galery relative from data/media
          * @path
@@ -53,6 +54,14 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
          * @random /all/one/??
          */
         $data = array();
+
+        if ($params['landscape']) {
+            $data['format'] = 'landscape';
+        } elseif ($params['portrait']) {
+            $data['format'] = 'portrait';
+        } elseif (isset($params['format'])) {
+            $data['format'] = $params['format'];
+        }
         /**
          * switch by type
          */
@@ -62,6 +71,12 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $data['type'] = 'slide';
         } else {
             $data['type'] = 'slide';
+        }
+
+        if ($params['mini']) {
+            $data['size'] = 'mini';
+        } else {
+            $data['size'] = 'normal';
         }
 
         /**
@@ -81,7 +96,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
              * is not set
              * find all gallery
              */
-            $all_gallerys = $this->get_all_gallery($params);
+            $all_gallerys = $this->get_all_gallery();
             if ($params['random'] == 'all') {
                 /**
                  * all
@@ -101,29 +116,21 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $data['foto'] = 1;
         }
 
-        
+
         $images = $this->get_all_images($gallerys);
 
-        $data['images'] = self::choose_images($images);
+        $data['images'] = self::choose_images($images, $data['foto'], $data['format']);
 
 
-
-        var_dump($data);
-
-
-
-
-        /**
-         * and find all files
-         */
-        $params['files'] = $this->getAllFiles($params);
-        $images['rand'] = self::choose_images($params);
-
-        foreach ($images['rand'] as $key => $value) {
-            $images['file'][$key] = $params['files'][$value];
+        if ($params['label'] != "") {
+            $data['label'] = $params['label'];
         }
-        $images['script'] = $this->getImageScript($images, $params);     //echo $script;
-        return array($state, array(array($images, $params)));
+
+        if ($data['type'] == 'slide') {
+            $data['script'] = $this->get_script($images, $data, $data['foto'], $data['rand']);
+        }
+
+        return array($state, array($data));
     }
 
     public function render($mode, Doku_Renderer &$renderer, $data) {
@@ -131,110 +138,117 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         if ($mode == 'xhtml') {
             /** @var Do ku_Renderer_xhtml $renderer */
             list($state, $matches) = $data;
-            list($match) = $matches;
-            list($images, $params) = $match;
+            list($data) = $matches;
 
+            
             /**
              * @TODO dorobiť pridavanie style a dalšíc atr;
              */
             $param = array('class' => 'FKS_image_show');
-            if (array_key_exists('static', $params)) {
-                $param = array_merge($param, array('data-animate' => 'static'));
-            } else {
-                $param = array_merge($param, array('data-animate' => 'slide', 'data-rand' => $params['rand']));
-                $renderer->doc.=$images['script'];
+
+            switch ($data['type']) {
+                case "static":
+                    $param = array_merge($param, array('data-animate' => 'static'));
+                    break;
+                case "slide":
+                    $param = array_merge($param, array('data-animate' => 'slide', 'data-rand' => $data['rand']));
+                    $renderer->doc.=$data['script'];
+                    break;
             }
-            if (array_key_exists('mini', $params)) {
-                $param['class'].=' FKS_image_show_mini';
+
+            switch ($data['size']) {
+                case "mini":
+                    $param['class'].=' FKS_image_show_mini';
+                    break;
+                default :
+                    break;
             }
+
+
+
             $renderer->doc .= html_open_tag('div', $param);
             /**
              * iné pre statické a iné pre slide
              */
-            if (array_key_exists('static', $params)) {
+            foreach ($data['images']as $value) {
+                $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
+                $renderer->doc .= html_open_tag('a', array('href' => $this->get_gallery_link($value)));
 
-                foreach ($images['file']as $value) {
-                    $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
-                    $renderer->doc .= html_open_tag('a', array('href' => $this->get_gallery_link($value)));
-                    if (!empty($params['label'])) {
-                        $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image', 'style' => 'background-image: url(\'' . self::get_media_link($value) . '\')'));
-                        $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image_title'));
-                        $renderer->doc .= html_open_tag('h2', array());
-                        $renderer->doc .= $params['label'];
-                        $renderer->doc .= html_close_tag('h2');
-                        $renderer->doc .= html_close_tag('div');
-                        $renderer->doc .= html_close_tag('div');
-                    } else {
-                        $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'alt' => 'foto', 'src' => self::get_media_link($value)));
-                    }
-                    $renderer->doc .= html_close_tag('a');
+                //$renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'alt' => 'foto', 'src' => self::get_media_link($value)));
+                $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image', 'style' => 'background-image: url(\'' . self::get_media_link($value) . '\')'));
+                $renderer->doc .= html_close_tag('div');
+                if ($data['label']) {
+                    $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image_title'));
+                    $renderer->doc .= html_open_tag('h2', array());
+                    $renderer->doc .= $data['label'];
+                    $renderer->doc .= html_close_tag('h2');
                     $renderer->doc .= html_close_tag('div');
                 }
-            } else {
-                $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
-                $renderer->doc .= html_open_tag('a', array());
-                $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'style' => 'opacity:0', 'src' => 'http://bradsknutson.com/wp-content/uploads/2013/04/page-loader.gif', 'alt' => 'foto'));
+               
+
+                //  $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'alt' => 'foto', 'src' => self::get_media_link($value)));
+
                 $renderer->doc .= html_close_tag('a');
                 $renderer->doc .= html_close_tag('div');
             }
+            /*
+              $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
+              $renderer->doc .= html_open_tag('a', array());
+              $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'style' => 'opacity:0', 'src' => 'http://bradsknutson.com/wp-content/uploads/2013/04/page-loader.gif', 'alt' => 'foto'));
+              $renderer->doc .= html_close_tag('a');
+              $renderer->doc .= html_close_tag('div');
+             * */
         }
         $renderer->doc .=html_close_tag('div');
 
         return false;
     }
 
-    private function getAllFiles($param = array()) {
+    private function get_all_images($gallerys) {
+        $files = Array();
+        foreach ($gallerys as $value) {
 
-        if (!isset($param["url"])) {
-            $dir = $this->getAllGallery();
-
-            $files = Array();
-            foreach ($dir as $key) {
-                $dir = DOKU_INC . 'data/media/' . $key;
-                $filess = self::allImage($dir);
-                $files = array_merge($files, $filess);
-            }
-        } else {
-            $dir = DOKU_INC . 'data/media/' . $param['url'];
-            $files = self::allImage($dir);
+            $dir = DOKU_INC . 'data/media/' . $value;
+            $filess = self::all_Image($dir);
+            $files = array_merge($files, $filess);
         }
+
         return $files;
     }
 
-    private static function choose_images($params = array()) {
-
-        for ($i = 0; $i < $params['foto']; $i++) {
-            $images[$i] = self::get_image($params);
+    private static function choose_images($images, $foto = 1, $format = null) {
+        
+        for ($i = 0; $i < $foto; $i++) {
+            $choose[$i] = self::get_image($images, $format);
         }
-        return $images;
+        
+        return $choose;
     }
 
-    private static function get_image($params) {
+    private static function get_image($images, $format) {
 
-        if (!$params['files']) {
+        if (!$images) {
             return null;
         }
-        $rand = rand(0, count($params['files']) - 1);
-        list($w, $h) = getimagesize($params['files'][$rand]);
-        if ($params['format'] == 'landscape') {
+        $rand = rand(0, count($images) - 1);
+        list($w, $h) = getimagesize($images[$rand]);
+        if ($format == 'landscape') {
             if ($w < $h) {
-                $rand = self::get_image($params);
+                $rand = self::get_image($images, $format);
             }
-        } elseif ($params['format'] == 'portrait') {
+        } elseif ($format == 'portrait') {
             if ($w > $h) {
-                $rand = self::get_image($params);
+                $rand = self::get_image($images, $format);
             }
         }
-        return $rand;
+        return $images[$rand];
     }
 
-    private function getImageScript($images, $params) {
-        if (array_key_exists('static', $params)) {
-            return;
-        }
+    private function get_script($images, &$data, $foto = 1, $rand = "") {
+
         $no = 0;
-        $script = '<script type="text/javascript"> files["' . $params['rand'] . '"]={"images":' . $params['foto'];
-        foreach ($images['file'] as $value) {
+        $script = '<script type="text/javascript"> files["' . $rand . '"]={"images":' . $foto;
+        foreach ($images as $value) {
             $script.='
                     ,' . $no . ':{
                     "href":"' . $this->get_gallery_link($value) . '",
@@ -242,6 +256,9 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $no++;
         }
         $script.='}' . html_close_tag('script');
+        unset($data['images']);
+        $data['images'][0] = " ";
+
         return $script;
     }
 
@@ -249,16 +266,16 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
      * 
      * @return array
      */
-    private function getAllGallery() {
+    private function get_all_gallery() {
         $dirs = $this->getConf('dirs');
 
         return (array) array_map(function($value) {
-                    return str_replace(array("\n", " "), '', $value);
+                    return trim($value);
                 }, explode(';', $dirs));
     }
 
     private static function get_media_link($link) {
-        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link), array('w' => 50));
+        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link), array('w' => 300), true, '&');
     }
 
     private function get_gallery_link($link) {
@@ -270,7 +287,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         return wl(str_replace(array(DOKU_INC, 'data/media'), '', $path['dirname'] . $this->getConf('gallery_page')));
     }
 
-    private static function allImage($dir) {
+    private static function all_Image($dir) {
         $files = helper_plugin_fkshelper::filefromdir($dir, false);
         $filtred_files = array_filter($files, function($v) {
             return is_array(@getimagesize($v));
