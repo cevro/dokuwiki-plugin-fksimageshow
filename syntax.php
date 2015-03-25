@@ -45,7 +45,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         /**
          * @type static / slide / ?,
          * @size normal mini;
-         * @link link to galery
+         * @href link to galery
          * @gallery  path to galery relative from data/media
          * @path
          * 
@@ -61,6 +61,11 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $data['format'] = 'portrait';
         } elseif (isset($params['format'])) {
             $data['format'] = $params['format'];
+        }
+        if ($params['href']) {
+            $data['href'] = $params['href'];
+        } else {
+            $data['href'] = false;
         }
         /**
          * switch by type
@@ -127,7 +132,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         }
 
         if ($data['type'] == 'slide') {
-            $data['script'] = $this->get_script($images, $data, $data['foto'], $data['rand']);
+            $data['script'] = $this->get_script($images, $data, $data['foto'], $data['rand'], $data['href']);
         }
 
         return array($state, array($data));
@@ -140,7 +145,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             list($state, $matches) = $data;
             list($data) = $matches;
 
-            
+
             /**
              * @TODO dorobiť pridavanie style a dalšíc atr;
              */
@@ -159,8 +164,10 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             switch ($data['size']) {
                 case "mini":
                     $param['class'].=' FKS_image_show_mini';
+                    $img_size = 300;
                     break;
                 default :
+                    $img_size = 600;
                     break;
             }
 
@@ -172,10 +179,10 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
              */
             foreach ($data['images']as $value) {
                 $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
-                $renderer->doc .= html_open_tag('a', array('href' => $this->get_gallery_link($value)));
+                $renderer->doc .= html_open_tag('a', array('href' => ($data['href']) ? wl($data['href']) : $this->get_gallery_link($value)));
 
-                //$renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'alt' => 'foto', 'src' => self::get_media_link($value)));
-                $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image', 'style' => 'background-image: url(\'' . self::get_media_link($value) . '\')'));
+
+                $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image', 'style' => 'background-image: url(\'' . self::get_media_link($value, $img_size) . '\')'));
                 $renderer->doc .= html_close_tag('div');
                 if ($data['label']) {
                     $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image_title'));
@@ -184,27 +191,17 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     $renderer->doc .= html_close_tag('h2');
                     $renderer->doc .= html_close_tag('div');
                 }
-               
-
-                //  $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'alt' => 'foto', 'src' => self::get_media_link($value)));
 
                 $renderer->doc .= html_close_tag('a');
                 $renderer->doc .= html_close_tag('div');
             }
-            /*
-              $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
-              $renderer->doc .= html_open_tag('a', array());
-              $renderer->doc .= html_make_tag('img', array('class' => 'FKS_image', 'style' => 'opacity:0', 'src' => 'http://bradsknutson.com/wp-content/uploads/2013/04/page-loader.gif', 'alt' => 'foto'));
-              $renderer->doc .= html_close_tag('a');
-              $renderer->doc .= html_close_tag('div');
-             * */
         }
         $renderer->doc .=html_close_tag('div');
 
         return false;
     }
 
-    private function get_all_images($gallerys) {
+    private static function get_all_images($gallerys) {
         $files = Array();
         foreach ($gallerys as $value) {
 
@@ -217,11 +214,11 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     private static function choose_images($images, $foto = 1, $format = null) {
-        
+
         for ($i = 0; $i < $foto; $i++) {
             $choose[$i] = self::get_image($images, $format);
         }
-        
+
         return $choose;
     }
 
@@ -244,15 +241,15 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         return $images[$rand];
     }
 
-    private function get_script($images, &$data, $foto = 1, $rand = "") {
+    private function get_script($images, &$data, $foto = 1, $rand = "", $href = false, $size = 300) {
 
         $no = 0;
         $script = '<script type="text/javascript"> files["' . $rand . '"]={"images":' . $foto;
         foreach ($images as $value) {
             $script.='
                     ,' . $no . ':{
-                    "href":"' . $this->get_gallery_link($value) . '",
-                    "src":"' . self::get_media_link($value) . '"}';
+                    "href":"' . (($href) ? wl($href) : $this->get_gallery_link($value)) . '",
+                    "src":"' . self::get_media_link($value, $size) . '"}';
             $no++;
         }
         $script.='}' . html_close_tag('script');
@@ -274,17 +271,40 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                 }, explode(';', $dirs));
     }
 
-    private static function get_media_link($link) {
-        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link), array('w' => 300), true, '&');
+    private static function get_media_link($link, $size = 300) {
+        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link), array('w' => $size), true, '&');
     }
 
     private function get_gallery_link($link) {
+        global $conf;
         if (!$this->getConf('allow_url')) {
-            return ' ';
+            return '#';
         }
-        $path = pathinfo($link);
 
-        return wl(str_replace(array(DOKU_INC, 'data/media'), '', $path['dirname'] . $this->getConf('gallery_page')));
+        $path = pathinfo($link);
+        preg_match('|' . $conf['mediadir'] . '[/](.*)|', $path['dirname'], $matches);
+        list(, $path_from_media) = $matches;
+        unset($matches);
+
+        $wiki_from_media = str_replace('/', ':', $path_from_media);
+
+        if ($this->getConf('pref_delete')) {
+            preg_match('|[:]?' . $this->getConf('pref_delete') . '[:](.*)|', $wiki_from_media, $matches);
+            list(, $wiki_from_media) = $matches;
+            unset($matches);
+        }
+        if ($this->getConf('sulf_delete')) {
+            preg_match('|(.*)[:]' . $this->getConf('pref_delete') . '[:]|', $wiki_from_media, $matches);
+            list(, $wiki_from_media) = $matches;
+            unset($matches);
+        }
+        if ($this->getConf('pref_add')) {
+            $wiki_from_media = $this->getConf('pref_add') . ':' . $wiki_from_media;
+        }
+        if ($this->getConf('sulf_add')) {
+            $wiki_from_media = $wiki_from_media . ':' . $this->getConf('sulf_add');
+        }
+        return wl($wiki_from_media);
     }
 
     private static function all_Image($dir) {
