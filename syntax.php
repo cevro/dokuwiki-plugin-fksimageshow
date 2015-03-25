@@ -135,6 +135,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $data['script'] = $this->get_script($images, $data, $data['foto'], $data['rand'], $data['href']);
         }
 
+        
         return array($state, array($data));
     }
 
@@ -197,6 +198,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             }
         }
         $renderer->doc .=html_close_tag('div');
+        
 
         return false;
     }
@@ -294,7 +296,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             unset($matches);
         }
         if ($this->getConf('sulf_delete')) {
-            preg_match('|(.*)[:]' . $this->getConf('pref_delete') . '[:]|', $wiki_from_media, $matches);
+            preg_match('|(.*)[:]' . $this->getConf('sulf_delete') . '[:]|', $wiki_from_media, $matches);
             list(, $wiki_from_media) = $matches;
             unset($matches);
         }
