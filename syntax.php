@@ -296,8 +296,9 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             unset($matches);
         }
         if ($this->getConf('sulf_delete')) {
-            preg_match('|(.*)[:]' . $this->getConf('sulf_delete') . '[:]|', $wiki_from_media, $matches);
+            preg_match('|\A(.*)[:]*' . $this->getConf('sulf_delete') . '[:]*\z|', $wiki_from_media, $matches);
             list(, $wiki_from_media) = $matches;
+            var_dump($matches, $path);
             unset($matches);
         }
         if ($this->getConf('pref_add')) {
