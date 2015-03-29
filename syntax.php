@@ -124,6 +124,8 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
         $images = $this->get_all_images($gallerys);
 
+
+
         $data['images'] = self::choose_images($images, $data['foto'], $data['format']);
 
 
@@ -131,11 +133,9 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $data['label'] = $params['label'];
         }
 
-        if ($data['type'] == 'slide') {
-            $data['script'] = $this->get_script($images, $data, $data['foto'], $data['rand'], $data['href']);
-        }
 
-        
+
+
         return array($state, array($data));
     }
 
@@ -143,7 +143,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
         if ($mode == 'xhtml') {
             /** @var Do ku_Renderer_xhtml $renderer */
-            list($state, $matches) = $data;
+            list(, $matches) = $data;
             list($data) = $matches;
 
 
@@ -152,16 +152,21 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
              */
             $param = array('class' => 'FKS_image_show');
 
+
+            /**
+             * iné pre statické a iné pre slide
+             */
             switch ($data['type']) {
                 case "static":
                     $param = array_merge($param, array('data-animate' => 'static'));
                     break;
                 case "slide":
                     $param = array_merge($param, array('data-animate' => 'slide', 'data-rand' => $data['rand']));
-                    $renderer->doc.=$data['script'];
                     break;
             }
-
+            /**
+             * for mini scale is smaller
+             */
             switch ($data['size']) {
                 case "mini":
                     $param['class'].=' FKS_image_show_mini';
@@ -172,12 +177,14 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     break;
             }
 
+            if ($data['type'] == 'slide') {
+                $renderer->doc.= $this->get_script($data['images'], $data, $data['foto'], $data['rand'], $data['href'], $img_size);
+            }
+
 
 
             $renderer->doc .= html_open_tag('div', $param);
-            /**
-             * iné pre statické a iné pre slide
-             */
+
             foreach ($data['images']as $value) {
                 $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
                 $renderer->doc .= html_open_tag('a', array('href' => ($data['href']) ? wl($data['href']) : $this->get_gallery_link($value)));
@@ -198,7 +205,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             }
         }
         $renderer->doc .=html_close_tag('div');
-        
+
 
         return false;
     }
@@ -218,6 +225,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     private static function choose_images($images, $foto = 1, $format = null) {
 
         for ($i = 0; $i < $foto; $i++) {
+
             $choose[$i] = self::get_image($images, $format);
         }
 
@@ -226,21 +234,25 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
     private static function get_image($images, $format) {
 
-        if (!$images) {
+        if (empty($images)) {
             return null;
         }
-        $rand = rand(0, count($images) - 1);
+
+        $rand = array_rand($images);
+        $img = $images[$rand];
         list($w, $h) = getimagesize($images[$rand]);
         if ($format == 'landscape') {
             if ($w < $h) {
-                $rand = self::get_image($images, $format);
+                $img = self::get_image($images, $format);
             }
         } elseif ($format == 'portrait') {
             if ($w > $h) {
-                $rand = self::get_image($images, $format);
+                $img = self::get_image($images, $format);
             }
         }
-        return $images[$rand];
+
+
+        return $img;
     }
 
     private function get_script($images, &$data, $foto = 1, $rand = "", $href = false, $size = 300) {
@@ -298,7 +310,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         if ($this->getConf('sulf_delete')) {
             preg_match('|\A(.*)[:]' . $this->getConf('sulf_delete') . '[:]*\z|', $wiki_from_media, $matches);
             list(, $wiki_from_media) = $matches;
-           
+
             unset($matches);
         }
         if ($this->getConf('pref_add')) {
@@ -315,6 +327,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         $filtred_files = array_filter($files, function($v) {
             return is_array(@getimagesize($v));
         });
+
         return $filtred_files;
     }
 

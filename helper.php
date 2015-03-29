@@ -19,14 +19,7 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
         $this->FKS_helper = $this->loadHelper('fkshelper');
     }
 
-    function resizeImage($image) {
-        list($w, $h) = getimagesize($image);
-        $k = $w / 320.0;
-        $hnew = floor($h / (double) $k);
-
-        $size = '?w=320' . '&h=' . $hnew . '&tok=' . $this->getRand();
-        return $size;
-    }
+    
 
 }
 
