@@ -95,7 +95,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             /**
              * is set galleryy
              */
-            $gallerys[] = $params['gallery'];
+            $gallerys[] = DOKU_INC.DIRECTORY_SEPARATOR.'data/media/'.$params['gallery'];
         }else{
             /**
              * is not set
@@ -179,6 +179,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $renderer->doc .= html_open_tag('div',$param);
             if($data['images'] == null){
                 $renderer->doc.='<div class="info">FKS_imageshow: No images find</div>';
+                
             }else{
                 if($data['type'] == 'slide'){
                     $renderer->doc.= $this->get_script($data['images'],$data,$data['foto'],$data['rand'],$data['href'],$img_size);
@@ -224,6 +225,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
     private static function get_all_images($gallerys) {
         $files = Array();
+        
         foreach ($gallerys as $value) {
 
             $dir = $value;
@@ -237,6 +239,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     private static function choose_images($images,$foto = 1,$format = null) {
         if($images == null){
             msg('No images to dislay',-1);
+            
             return;
         }
         for ($i = 0; $i < $foto; $i++) {
@@ -361,10 +364,13 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     private static function all_Image($dir) {
+        
         $files = helper_plugin_fkshelper::filefromdir($dir,false);
 
         if($files == null){
+            
             return array();
+            
         }
         $filtred_files = array_filter($files,function($v) {
             return is_array(@getimagesize($v));
