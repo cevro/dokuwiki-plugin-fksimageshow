@@ -30,13 +30,13 @@ jQuery(function () {
             $(this).remove(); // prevent memory leaks as @benweet suggested
             $bg_img.animate({opacity: 1}, 1000, function () {
                 next++;
-                var Dtime= 4000+(Math.random()-0.5)*3000;
+                //var Dtime= 4000+(Math.random()-0.5)*3000;
                 window.setTimeout(function () {
                     $bg_img.animate({opacity: 0}, 1000, function () {
                         _slide_next($bg_img, rand, next);
 
                     });
-                }, Dtime);
+                }, 3000);
 
             });
         });

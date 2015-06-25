@@ -153,7 +153,6 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
              */
             $param = array('class' => 'FKS_image_show');
 
-
             /**
              * iné pre statické a iné pre slide
              */
