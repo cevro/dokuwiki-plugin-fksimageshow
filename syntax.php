@@ -5,7 +5,7 @@
  * @author     Michal Červeňák <miso@fykos.cz>
  */
 // must be run within Dokuwiki
-if (!defined('DOKU_INC')) {
+if(!defined('DOKU_INC')){
     die();
 }
 
@@ -24,7 +24,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     public function getAllowedTypes() {
-        return array('formatting', 'substition', 'disabled');
+        return array('formatting','substition','disabled');
     }
 
     public function getSort() {
@@ -32,92 +32,93 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('\{\{fksimageshow>.+?\}\}', $mode, 'plugin_fksimageshow');
+        $this->Lexer->addSpecialPattern('\{\{fksimageshow>.+?\}\}',$mode,'plugin_fksimageshow');
     }
 
     /**
      * Handle the match
      */
-    public function handle($match, $state, $pos, Doku_Handler &$handler) {
+    public function handle($match,$state) {
 
 
-        $params = helper_plugin_fkshelper::extractParamtext(substr($match, 15, -2));
+        $params = helper_plugin_fkshelper::extractParamtext(substr($match,15,-2));
         /**
-         * @type static / slide / ?,
-         * @size normal mini;
-         * @href link to galery
-         * @gallery  path to galery relative from data/media
-         * @path
+         * @params[type] static / slide / ?,
+         * @params[size] normal/mini;
+         * @params[href] link to galery
+         * @params[gallery]  path to galery relative from data/media
+         * @params[path]
          * 
-         * @foto 
-         * @label text 
-         * @random /all/one/??
+         * @params[foto] 
+         * @params[label] text 
+         * @params[random] /all/one/??
          */
         $data = array();
 
-        if ($params['landscape']) {
+        if($params['landscape']){
             $data['format'] = 'landscape';
-        } elseif ($params['portrait']) {
+        }elseif($params['portrait']){
             $data['format'] = 'portrait';
-        } elseif (isset($params['format'])) {
+        }elseif(isset($params['format'])){
             $data['format'] = $params['format'];
         }
-        if ($params['href']) {
+        if($params['href']){
             $data['href'] = $params['href'];
-        } else {
+        }else{
             $data['href'] = false;
         }
         /**
          * switch by type
          */
-        if ($params['static']) {
+        if($params['static']){
             $data['type'] = 'static';
-        } elseif ($params['slide']) {
+        }elseif($params['slide']){
             $data['type'] = 'slide';
-        } else {
+        }else{
             $data['type'] = 'slide';
         }
 
-        if ($params['mini']) {
+        if($params['mini']){
             $data['size'] = 'mini';
-        } else {
+        }else{
             $data['size'] = 'normal';
         }
 
         /**
          * for slide muss generate rand
          */
-        if ($data['type'] == 'slide') {
-            $data['rand'] = $this->helper->FKS_helper->_generate_rand(5);
+        if($data['type'] == 'slide'){
+            $data['rand'] = helper_plugin_fkshelper::_generate_rand(5);
         }
 
-        if (isset($params['gallery'])) {
+        if(isset($params['gallery'])){
             /**
              * is set galleryy
              */
             $gallerys[] = $params['gallery'];
-        } else {
+        }else{
             /**
              * is not set
              * find all gallery
              */
             $all_gallerys = $this->get_all_gallery();
-            if ($params['random'] == 'all') {
+            if($params['random'] == 'all'){
                 /**
                  * all
                  */
                 $gallerys = $all_gallerys;
-            } else {
+            }else{
                 /**
                  * one
                  */
-                $rand = rand(0, count($all_gallerys) - 1);
+                $rand = array_rand($all_gallerys);
                 $gallerys[] = $all_gallerys[$rand];
             }
         }
-        if (isset($params['foto'])) {
+
+        if(isset($params['foto'])){
             $data['foto'] = $params['foto'];
-        } else {
+        }else{
             $data['foto'] = 1;
         }
 
@@ -126,26 +127,26 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
 
 
-        $data['images'] = self::choose_images($images, $data['foto'], $data['format']);
+        $data['images'] = self::choose_images($images,$data['foto'],$data['format']);
 
 
-        if ($params['label'] != "") {
+        if($params['label'] != ""){
             $data['label'] = $params['label'];
         }
 
 
 
 
-        return array($state, array($data));
+        return array($state,array($data));
     }
 
-    public function render($mode, Doku_Renderer &$renderer, $data) {
+    public function render($mode,Doku_Renderer &$renderer,$data) {
 
-        if ($mode == 'xhtml') {
+        if($mode == 'xhtml'){
             /** @var Do ku_Renderer_xhtml $renderer */
-            list(, $matches) = $data;
+            list(,$matches) = $data;
             list($data) = $matches;
-
+          
 
             /**
              * @TODO dorobiť pridavanie style a dalšíc atr;
@@ -158,10 +159,10 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
              */
             switch ($data['type']) {
                 case "static":
-                    $param = array_merge($param, array('data-animate' => 'static'));
+                    $param = array_merge($param,array('data-animate' => 'static'));
                     break;
                 case "slide":
-                    $param = array_merge($param, array('data-animate' => 'slide', 'data-rand' => $data['rand']));
+                    $param = array_merge($param,array('data-animate' => 'slide','data-rand' => $data['rand']));
                     break;
             }
             /**
@@ -176,32 +177,21 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     $img_size = 600;
                     break;
             }
-
-            if ($data['type'] == 'slide') {
-                $renderer->doc.= $this->get_script($data['images'], $data, $data['foto'], $data['rand'], $data['href'], $img_size);
-            }
-
-
-
-            $renderer->doc .= html_open_tag('div', $param);
-
-            foreach ($data['images']as $value) {
-                $renderer->doc .= html_open_tag('div', array('class' => 'FKS_images'));
-                $renderer->doc .= html_open_tag('a', array('href' => ($data['href']) ? wl($data['href']) : $this->get_gallery_link($value)));
-
-
-                $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image', 'style' => 'background-image: url(\'' . self::get_media_link($value, $img_size) . '\')'));
-                $renderer->doc .= html_close_tag('div');
-                if ($data['label']) {
-                    $renderer->doc .= html_open_tag('div', array('class' => 'FKS_image_title'));
-                    $renderer->doc .= html_open_tag('h2', array());
-                    $renderer->doc .= $data['label'];
-                    $renderer->doc .= html_close_tag('h2');
+            $renderer->doc .= html_open_tag('div',$param);
+            if($data['images'] == null){
+                $renderer->doc.='<div class="info">FKS_imageshow: No images find</div>';
+            }else{
+                if($data['type'] == 'slide'){
+                    $renderer->doc.= $this->get_script($data['images'],$data,$data['foto'],$data['rand'],$data['href'],$img_size);
+                }
+                foreach ($data['images']as $value) {
+                    $renderer->doc .= html_open_tag('div',array('class' => 'images'));
+                    $renderer->doc .= html_open_tag('a',array('href' => ($data['href']) ? wl($data['href']) : $this->get_gallery_link($value)));
+                    $renderer->doc .= self::make_image($value,$img_size);
+                    $renderer->doc .= self::make_label($data['label']);
+                    $renderer->doc .= html_close_tag('a');
                     $renderer->doc .= html_close_tag('div');
                 }
-
-                $renderer->doc .= html_close_tag('a');
-                $renderer->doc .= html_close_tag('div');
             }
         }
         $renderer->doc .=html_close_tag('div');
@@ -210,44 +200,77 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         return false;
     }
 
+    private static function make_image($image,$img_size) {
+        $r .= html_open_tag('div',array('class' => 'image','style' => 'background-image: url(\''.self::get_media_link($image,$img_size).'\')'));
+        $r .= html_close_tag('div');
+        return $r;
+    }
+
+    private static function make_label($label) {
+        if($label == null){
+            return '';
+        }
+        if(preg_match('/@exif/',$label)){
+            /**
+             * TODO!!!
+             */
+        }
+        $r.= html_open_tag('div',array('class' => 'title'));
+        $r .= html_open_tag('h2',array());
+        $r.= $label;
+        $r.= html_close_tag('h2');
+        $r.= html_close_tag('div');
+        return $r;
+    }
+
     private static function get_all_images($gallerys) {
         $files = Array();
         foreach ($gallerys as $value) {
 
-            $dir = DOKU_INC . 'data/media/' . $value;
+            $dir = $value;
             $filess = self::all_Image($dir);
-            $files = array_merge($files, $filess);
+            $files = array_merge($files,$filess);
         }
 
         return $files;
     }
 
-    private static function choose_images($images, $foto = 1, $format = null) {
-
+    private static function choose_images($images,$foto = 1,$format = null) {
+        if($images == null){
+            msg('No images to dislay',-1);
+            return;
+        }
         for ($i = 0; $i < $foto; $i++) {
 
-            $choose[$i] = self::get_image($images, $format);
+            $choose[$i] = self::get_image($images,$format);
         }
 
         return $choose;
     }
 
-    private static function get_image($images, $format) {
-
-        if (empty($images)) {
+    private static function get_image($images,$format) {
+        /*
+         * when is images empty 
+         */
+        if(empty($images)){
             return null;
         }
-
+        /*
+         * random key of array
+         */
         $rand = array_rand($images);
         $img = $images[$rand];
-        list($w, $h) = getimagesize($images[$rand]);
-        if ($format == 'landscape') {
-            if ($w < $h) {
-                $img = self::get_image($images, $format);
+        list($w,$h) = getimagesize($img);
+        /*
+         * is format ok ?
+         */
+        if($format == 'landscape'){
+            if($w < $h){
+                $img = self::get_image($images,$format);
             }
-        } elseif ($format == 'portrait') {
-            if ($w > $h) {
-                $img = self::get_image($images, $format);
+        }elseif($format == 'portrait'){
+            if($w > $h){
+                $img = self::get_image($images,$format);
             }
         }
 
@@ -255,20 +278,20 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         return $img;
     }
 
-    private function get_script($images, &$data, $foto = 1, $rand = "", $href = false, $size = 300) {
+    private function get_script($images,&$data,$foto = 1,$rand = "",$href = false,$size = 300) {
 
         $no = 0;
-        $script = '<script type="text/javascript"> files["' . $rand . '"]={"images":' . $foto;
+        $script = '<script type="text/javascript"> files["'.$rand.'"]={"images":'.$foto;
         foreach ($images as $value) {
             $script.='
-                    ,' . $no . ':{
-                    "href":"' . (($href) ? wl($href) : $this->get_gallery_link($value)) . '",
-                    "src":"' . self::get_media_link($value, $size) . '"}';
+                    ,'.$no.':{
+                    "href":"'.(($href) ? wl($href) : $this->get_gallery_link($value)).'",
+                    "src":"'.self::get_media_link($value,$size).'"}';
             $no++;
         }
-        $script.='}' . html_close_tag('script');
+        $script.='}'.html_close_tag('script');
         unset($data['images']);
-        $data['images'][0] = " ";
+        $data['images'][0] = "";
 
         return $script;
     }
@@ -279,52 +302,72 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
      */
     private function get_all_gallery() {
         $dirs = $this->getConf('dirs');
+        $_dirs = array_map(function($value) {
+            return DOKU_INC.'data/media/'.trim($value);
+        },explode(';',$dirs));
+        $sub_dirs = array();
+        $all_dirs = array_filter($_dirs,function($value)use(&$sub_dirs) {
+            if(preg_match('/(.*)\*\z/',$value)){
 
-        return (array) array_map(function($value) {
-                    return trim($value);
-                }, explode(';', $dirs));
+
+                $_sub_dirs = array_filter(glob($value),"is_dir");
+
+                $sub_dirs = array_merge($sub_dirs,$_sub_dirs);
+
+                return FALSE;
+            }
+            return true;
+        });
+
+
+        return (array) array_merge($all_dirs,$sub_dirs);
     }
 
-    private static function get_media_link($link, $size = 300) {
-        return ml(str_replace(array(DOKU_INC, 'data/media'), '', $link), array('w' => $size), true, '&');
+    private static function get_media_link($link,$size = 300) {
+        return ml(str_replace(array(DOKU_INC,'data/media'),'',$link),array('w' => $size),true,'&');
     }
 
     private function get_gallery_link($link) {
         global $conf;
-        if (!$this->getConf('allow_url')) {
+        if(!$this->getConf('allow_url')){
             return '#';
         }
 
         $path = pathinfo($link);
-        preg_match('|' . $conf['mediadir'] . '[/](.*)|', $path['dirname'], $matches);
-        list(, $path_from_media) = $matches;
+        $matches = array();
+        preg_match('|'.$conf['mediadir'].'[/](.*)|',$path['dirname'],$matches);
+        list(,$path_from_media) = $matches;
         unset($matches);
 
-        $wiki_from_media = str_replace('/', ':', $path_from_media);
+        $wiki_from_media = str_replace('/',':',$path_from_media);
 
-        if ($this->getConf('pref_delete')) {
-            preg_match('|[:]?' . $this->getConf('pref_delete') . '[:](.*)|', $wiki_from_media, $matches);
-            list(, $wiki_from_media) = $matches;
+        if($this->getConf('pref_delete')){
+            preg_match('|[:]?'.$this->getConf('pref_delete').'[:](.*)|',$wiki_from_media,$matches);
+            list(,$wiki_from_media) = $matches;
             unset($matches);
         }
-        if ($this->getConf('sulf_delete')) {
-            preg_match('|\A(.*)[:]' . $this->getConf('sulf_delete') . '[:]*\z|', $wiki_from_media, $matches);
-            list(, $wiki_from_media) = $matches;
+        if($this->getConf('sulf_delete')){
+            preg_match('|\A(.*)[:]'.$this->getConf('sulf_delete').'[:]*\z|',$wiki_from_media,$matches);
+            list(,$wiki_from_media) = $matches;
 
             unset($matches);
         }
-        if ($this->getConf('pref_add')) {
-            $wiki_from_media = $this->getConf('pref_add') . ':' . $wiki_from_media;
+        if($this->getConf('pref_add')){
+            $wiki_from_media = $this->getConf('pref_add').':'.$wiki_from_media;
         }
-        if ($this->getConf('sulf_add')) {
-            $wiki_from_media = $wiki_from_media . ':' . $this->getConf('sulf_add');
+        if($this->getConf('sulf_add')){
+            $wiki_from_media = $wiki_from_media.':'.$this->getConf('sulf_add');
         }
         return wl($wiki_from_media);
     }
 
     private static function all_Image($dir) {
-        $files = helper_plugin_fkshelper::filefromdir($dir, false);
-        $filtred_files = array_filter($files, function($v) {
+        $files = helper_plugin_fkshelper::filefromdir($dir,false);
+
+        if($files == null){
+            return array();
+        }
+        $filtred_files = array_filter($files,function($v) {
             return is_array(@getimagesize($v));
         });
 
