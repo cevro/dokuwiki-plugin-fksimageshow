@@ -13,10 +13,7 @@ and open the template in the editor.
 * define width of elements
 */
 
-.FKS_image_show{
-    width:100%;
 
-}
 
 @media  (min-width:600px){
     .FKS_image_show_mini{
@@ -29,49 +26,76 @@ and open the template in the editor.
 
 
 
-.FKS_image_show_mini{
-    &:nth-child(even){
+
+
+.FKS_image_show{
+    padding:0.5em;
+
+    &[data-size=normal]{
+        width:100%;
         .images{
-            margin-left: .5em;
+            height: 300px;
         }
-
+    }
+    &[data-size=mini]{
+        width:50%;
+        .images{
+            height: 250px;  
+        }
+    }
+    &[data-size=mikro]{
+        width:33%;
+        .images{
+            height: 200px;  
+        }
+    }
+    
+     &[data-position=left]{
+        float:left;
+    }
+     &[data-position=right]{
+        float:right;
+    }
+     &[data-position=center]{
+        /*TODO!!!*/
     }
 
-}
-
-.FKS_image_show,.FKS_image_show_mini{
     .images{
-    position:relative; 
-    height: 300px;
-    margin-top:.5em;
+        position:relative; 
 
-    overflow:hidden;
-    .image{
-        background-size: cover;
-        background-position-y:50%;
-        height: 100%;
-        width: 100%;
+        margin-top:.5em;
 
-    }
-    .title{
-        background-color: __text_alt__;
-        position:absolute; 
-        bottom:0;
-        width: 100%;
-        h2{
-            color:__background__ !important;
-            padding-left: .5em;
-            padding-right: .5em;
-            font-size: 200%;
+        overflow:hidden;
+
+
+
+
+        .image{
+            background-size: cover;
+            background-position-y:50%;
+            height: 100%;
+            width: 100%;
+
         }
-    }
-    &:hover{ 
-        opacity: 0.9;
         .title{
-            //background-color: __text_alt_hover__;
+            background-color: __text_alt__;
+            position:absolute; 
+            bottom:0;
+            width: 100%;
+            h2{
+                color:__background__ !important;
+                padding-left: .5em;
+                padding-right: .5em;
+                font-size: 200%;
+            }
+        }
+        &:hover{ 
+            opacity: 0.9;
+            .title{
+                //background-color: __text_alt_hover__;
+            }
         }
     }
-}
 }
 
 

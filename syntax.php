@@ -78,11 +78,20 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $data['type'] = 'slide';
         }
 
-        if($params['mini']){
-            $data['size'] = 'mini';
-        }else{
-            $data['size'] = 'normal';
+        $data['size']='normal';
+        $data['position']='center';
+        foreach (array('mini','mikro','normal') as $size) {
+            if($params[$size]){
+                $data['size']=$size;
+            }
         }
+        foreach (array('left','right','auto','center') as $position) {
+            if($params[$position]){
+                $data['position']=$position;
+            }
+        }
+
+        
 
         /**
          * for slide muss generate rand
@@ -141,12 +150,12 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     public function render($mode,Doku_Renderer &$renderer,$data) {
-
+        global $ID;
         if($mode == 'xhtml'){
             /** @var Do ku_Renderer_xhtml $renderer */
             list(,$matches) = $data;
             list($data) = $matches;
-          
+
 
             /**
              * @TODO dorobiť pridavanie style a dalšíc atr;
@@ -169,18 +178,40 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
              */
             switch ($data['size']) {
                 case "mini":
-                    $param['class'].=' FKS_image_show_mini';
+                    $param['data-size'].='mini';
                     $img_size = 300;
                     break;
+                case "mikro":
+                    $param['data-size'].='mikro';
+                    $img_size = 200;
+                    break;
                 default :
+                    $param['data-size'].='normal';
+                    $img_size = 600;
+                    break;
+            }
+            switch ($data['position']) {
+                case "left":
+                    $param['data-position'].='left';
+                    $img_size = 300;
+                    break;
+                case "right":
+                    $param['data-position'].='right';
+                    $img_size = 200;
+                    break;
+                default :
+                    $param['data-position'].='centrer';
                     $img_size = 600;
                     break;
             }
             $renderer->doc .= html_open_tag('div',$param);
             if($data['images'] == null){
-                $renderer->doc.='<div class="info">FKS_imageshow: No images find</div>';
-                
+
+                if(auth_quickaclcheck($ID) >= AUTH_EDIT){
+                    $renderer->doc.='<div class="info">FKS_imageshow: No images find</div>';
+                }
             }else{
+
                 if($data['type'] == 'slide'){
                     $renderer->doc.= $this->get_script($data['images'],$data,$data['foto'],$data['rand'],$data['href'],$img_size);
                 }
@@ -225,7 +256,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
     private static function get_all_images($gallerys) {
         $files = Array();
-        
+
         foreach ($gallerys as $value) {
 
             $dir = $value;
@@ -238,8 +269,8 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
 
     private static function choose_images($images,$foto = 1,$format = null) {
         if($images == null){
-            msg('No images to dislay',-1);
-            
+            msg('No images to dislay',-1,'','',MSG_USERS_ONLY);
+
             return;
         }
         for ($i = 0; $i < $foto; $i++) {
@@ -364,13 +395,12 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
     }
 
     private static function all_Image($dir) {
-        
+
         $files = helper_plugin_fkshelper::filefromdir($dir,false);
 
         if($files == null){
-            
+
             return array();
-            
         }
         $filtred_files = array_filter($files,function($v) {
             return is_array(@getimagesize($v));
