@@ -104,7 +104,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             /**
              * is set galleryy
              */
-            $gallerys[] = DOKU_INC.DIRECTORY_SEPARATOR.'data/media/'.$params['gallery'];
+            $gallerys[] = DOKU_INC.'data/media/'.$params['gallery'];
         }else{
             /**
              * is not set
@@ -160,6 +160,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             /**
              * @TODO dorobiť pridavanie style a dalšíc atr;
              */
+           
             $param = array('class' => 'FKS_image_show');
 
             /**
@@ -217,7 +218,8 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                 }
                 foreach ($data['images']as $value) {
                     $renderer->doc .= html_open_tag('div',array('class' => 'images'));
-                    $renderer->doc .= html_open_tag('a',array('href' => ($data['href']) ? wl($data['href']) : $this->get_gallery_link($value)));
+                 
+                    $renderer->doc .= html_open_tag('a',array('href' => ($data['href'] ? wl($data['href']) : $this->get_gallery_link($value))));
                     $renderer->doc .= self::make_image($value,$img_size);
                     $renderer->doc .= self::make_label($data['label']);
                     $renderer->doc .= html_close_tag('a');
@@ -370,6 +372,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         $matches = array();
         preg_match('|'.$conf['mediadir'].'[/](.*)|',$path['dirname'],$matches);
         list(,$path_from_media) = $matches;
+        
         unset($matches);
 
         $wiki_from_media = str_replace('/',':',$path_from_media);
