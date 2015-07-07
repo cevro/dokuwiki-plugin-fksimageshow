@@ -14,7 +14,7 @@ jQuery(function () {
 
     function _start_slide($div) {
         var rand = $div.data('rand');
-        var $bg_img = $div.children().children().children('.image');
+        var $bg_img = $('.image',$div);
         _slide_next($bg_img, rand, 0);
 
     }
