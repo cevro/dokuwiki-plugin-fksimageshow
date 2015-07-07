@@ -1,18 +1,7 @@
-/*
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
-*/
-/* 
-    Created on : Nov 30, 2014, 2:50:38 PM
-    Author     : miso
-*/
-
-
 /**
-* define width of elements
+*    Created on : Nov 30, 2014, 2:50:38 PM
+*   Author     : Michal Červeňák <miso@fykos.cz>
 */
-
 
 
 @media  (min-width:600px){
@@ -21,15 +10,9 @@ and open the template in the editor.
         float:left;
     }
 }
-
-
-
-
-
-
-
 .FKS_image_show{
-    padding:0.5em;
+    padding:0;
+
 
     &[data-size=normal]{
         width:100%;
@@ -49,50 +32,44 @@ and open the template in the editor.
             height: 200px;  
         }
     }
-    
-     &[data-position=left]{
+
+    &[data-position=left]{
         float:left;
     }
-     &[data-position=right]{
+    &[data-position=right]{
         float:right;
     }
-     &[data-position=center]{
+    &[data-position=center]{
         /*TODO!!!*/
     }
+    .image_show{
+        padding:0.5em;
 
-    .images{
-        position:relative; 
-
-        margin-top:.5em;
-
-        overflow:hidden;
-
-
-
-
-        .image{
-            background-size: cover;
-            background-position-y:50%;
-            height: 100%;
-            width: 100%;
-
-        }
-        .title{
-            background-color: __text_alt__;
-            position:absolute; 
-            bottom:0;
-            width: 100%;
-            h2{
-                color:__background__ !important;
-                padding-left: .5em;
-                padding-right: .5em;
-                font-size: 200%;
+        .images{
+            position:relative;
+         
+            overflow:hidden;
+            .image{
+                background-size: cover;
+                background-position-y:50%;
+                height: 100%;
+                width: 100%;
             }
-        }
-        &:hover{ 
-            opacity: 0.9;
-            .title{
-                //background-color: __text_alt_hover__;
+            .title{           
+                background-color: __text_alt__;
+                position:absolute; 
+                bottom:0;
+                width: 100%;
+                h2{
+                    color:__background__ !important;
+                    padding-left: .5em;
+                    padding-right: .5em;
+                    font-size: 200%;
+                }
+            }
+            &:hover{ 
+                opacity: 0.9;
+
             }
         }
     }

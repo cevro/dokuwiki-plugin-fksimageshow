@@ -78,20 +78,20 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             $data['type'] = 'slide';
         }
 
-        $data['size']='normal';
-        $data['position']='center';
+        $data['size'] = 'normal';
+        $data['position'] = 'center';
         foreach (array('mini','mikro','normal') as $size) {
             if($params[$size]){
-                $data['size']=$size;
+                $data['size'] = $size;
             }
         }
         foreach (array('left','right','auto','center') as $position) {
             if($params[$position]){
-                $data['position']=$position;
+                $data['position'] = $position;
             }
         }
 
-        
+
 
         /**
          * for slide muss generate rand
@@ -160,7 +160,6 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
             /**
              * @TODO dorobiť pridavanie style a dalšíc atr;
              */
-           
             $param = array('class' => 'FKS_image_show');
 
             /**
@@ -175,7 +174,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     break;
             }
             /**
-             * for mini scale is smaller
+             * for mini/mikro scale is smaller
              */
             switch ($data['size']) {
                 case "mini":
@@ -191,6 +190,10 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     $img_size = 600;
                     break;
             }
+
+            /*
+             * set floating
+             */
             switch ($data['position']) {
                 case "left":
                     $param['data-position'].='left';
@@ -217,12 +220,14 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     $renderer->doc.= $this->get_script($data['images'],$data,$data['foto'],$data['rand'],$data['href'],$img_size);
                 }
                 foreach ($data['images']as $value) {
+                    $renderer->doc .= html_open_tag('div',array('class' => 'image_show'));
                     $renderer->doc .= html_open_tag('div',array('class' => 'images'));
-                 
-                    $renderer->doc .= html_open_tag('a',array('href' => ($data['href'] ? wl($data['href']) : $this->get_gallery_link($value))));
+
+                    $renderer->doc .= html_open_tag('a',array('href' => ($data['href'] ? str_replace("//",'/',wl($data['href'])) : $this->get_gallery_link($value))));
                     $renderer->doc .= self::make_image($value,$img_size);
                     $renderer->doc .= self::make_label($data['label']);
                     $renderer->doc .= html_close_tag('a');
+                    $renderer->doc .= html_close_tag('div');
                     $renderer->doc .= html_close_tag('div');
                 }
             }
@@ -372,7 +377,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         $matches = array();
         preg_match('|'.$conf['mediadir'].'[/](.*)|',$path['dirname'],$matches);
         list(,$path_from_media) = $matches;
-        
+
         unset($matches);
 
         $wiki_from_media = str_replace('/',':',$path_from_media);
