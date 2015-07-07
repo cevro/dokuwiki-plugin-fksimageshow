@@ -207,7 +207,9 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     $param['data-position'].='centrer';
                     $img_size = 600;
                     break;
-            }
+            }            
+            $data['href']=$this->get_gallery_link($data['href'],$data['images'][0]);
+            
             $renderer->doc .= html_open_tag('div',$param);
             if($data['images'] == null){
 
@@ -223,7 +225,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
                     $renderer->doc .= html_open_tag('div',array('class' => 'image_show'));
                     $renderer->doc .= html_open_tag('div',array('class' => 'images'));
 
-                    $renderer->doc .= html_open_tag('a',array('href' => ($data['href'] ? str_replace("//",'/',wl($data['href'])) : $this->get_gallery_link($value))));
+                    $renderer->doc .= html_open_tag('a',array('href' => $data['href']));
                     $renderer->doc .= self::make_image($value,$img_size);
                     $renderer->doc .= self::make_label($data['label']);
                     $renderer->doc .= html_close_tag('a');
@@ -325,7 +327,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         foreach ($images as $value) {
             $script.='
                     ,'.$no.':{
-                    "href":"'.(($href) ? wl($href) : $this->get_gallery_link($value)).'",
+                    "href":"'.$href.'",
                     "src":"'.self::get_media_link($value,$size).'"}';
             $no++;
         }
@@ -367,10 +369,13 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         return ml(str_replace(array(DOKU_INC,'data/media'),'',$link),array('w' => $size),true,'&');
     }
 
-    private function get_gallery_link($link) {
+    private function get_gallery_link($href=null,$link='') {
         global $conf;
         if(!$this->getConf('allow_url')){
             return '#';
+        }
+        if($href){
+            return wl(cleanID($href));
         }
 
         $path = pathinfo($link);
@@ -399,7 +404,7 @@ class syntax_plugin_fksimageshow extends DokuWiki_Syntax_Plugin {
         if($this->getConf('sulf_add')){
             $wiki_from_media = $wiki_from_media.':'.$this->getConf('sulf_add');
         }
-        return wl($wiki_from_media);
+        return wl(cleanID($wiki_from_media));
     }
 
     private static function all_Image($dir) {
