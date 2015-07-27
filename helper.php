@@ -305,6 +305,9 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
         if(!$this->getConf('allow_url')){
             return '#';
         }
+        if(preg_match('|\Ahttp://|',$href)||preg_match('|\Ahttps://|',$href)){
+            return $href;
+        }
         if($href){
             return wl(cleanID($href));
         }
