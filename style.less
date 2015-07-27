@@ -4,71 +4,180 @@
 */
 
 
-@media  (min-width:600px){
-    .FKS_image_show_mini{
-        width: 50%; 
-        float:left;
+@media  (max-width:419px){
+    .FKS_image_show{
+        &.tera,&.giga,&.mega,&kilo,&.normal,&.mili,&.mikro,&.nano,&.piko{
+            width:100%;
+            .images{
+                height: 300px;
+                h2{
+                    font-size: 200%;
+                }
+            }
+        }
     }
 }
+
+@media  (min-width:420px)and(max-width:599px){
+    .FKS_image_show{
+        &.tera,&.giga,&.mega,&kilo{
+            width:100%;
+            .images{
+                height: 300px;
+                h2{
+                    font-size: 200%;
+                }
+            }
+        }        
+        &.normal,&.mili,&.mikro,&.nano,&.piko{
+            width:50%;
+            .images{
+                height: 150px;
+                h2{
+                    font-size: 150%;
+                }
+            }
+        }
+    }
+}
+@media (min-width:600px){
+    .FKS_image_show{
+        &.tera{
+            width:100%;
+            .images{
+                height: 600px;
+                h2{
+                    font-size: 200%;
+                }
+            }
+        }
+        &.giga{
+            width:80%;
+            .images{
+                height: 480px;
+                h2{
+                    font-size: 180%;
+                }
+            }
+        }
+        &.mega{
+            width:66.66666%;
+            .images{
+                height: 400px;
+                h2{
+                    font-size: 166%;
+                }
+            }
+        }
+        &.kilo{
+            width:60%;
+            .images{
+                height: 360px;
+                h2{
+                    font-size: 160%;
+                }
+            }
+        }
+
+        &.normal{
+            width:50%;
+            .images{
+                height: 300px;
+                h2{
+                    font-size: 150%;
+                }
+            }
+        }
+
+        &.mili{
+            width:40%;
+            .images{
+                height: 240px;
+                h2{
+                    font-size: 140%;
+                }
+            }
+        }
+
+        &.mikro{
+            width:33.3333333%;
+            .images{
+                height: 200px;  
+                h2{
+                    font-size: 133%;
+                }
+            }
+        }
+        &.nano{
+            width:25%;
+            .images{
+                height: 150px; 
+                h2{
+                    font-size: 125%;
+                }
+            }
+        }
+        &.piko{
+            width:20%;
+            .images{
+                height: 120px; 
+                h2{
+                    font-size: 120%;
+                }
+            }
+        }
+    }
+
+}
+
 .FKS_image_show{
     padding:0;
 
 
-    &[data-size=normal]{
-        width:100%;
-        .images{
-            height: 300px;
-        }
-    }
-    &[data-size=mini]{
-        width:50%;
-        .images{
-            height: 250px;  
-        }
-    }
-    &[data-size=mikro]{
-        width:33%;
-        .images{
-            height: 200px;  
-        }
-    }
-
-    &[data-position=left]{
+    &.left{
         float:left;
     }
-    &[data-position=right]{
+    &.right{
         float:right;
     }
-    &[data-position=center]{
+    &.center{
+        //clear: both;
         /*TODO!!!*/
     }
     .image_show{
         padding:0.5em;
+        overflow:hidden;
 
         .images{
-            position:relative;
-         
-            overflow:hidden;
+            margin-top: -1em;
+            position:relative;         
+
             .image{
+
                 background-size: cover;
                 background-position-y:50%;
                 height: 100%;
                 width: 100%;
             }
-            .title{           
-                background-color: __text_alt__;
+            .title{    
+                background-image: linear-gradient(fade(@ini_text_alt,50%), fade(@ini_text_alt,100%) );                
                 position:absolute; 
                 bottom:0;
                 width: 100%;
                 h2{
                     color:__background__ !important;
+                    margin-top:.5em;
                     padding-left: .5em;
                     padding-right: .5em;
-                    font-size: 200%;
+
                 }
             }
             &:hover{ 
-                opacity: 0.9;
+                .title{
+
+                    background-image: linear-gradient(fade(darken(@ini_text_alt,10%),50%), fade(darken(@ini_text_alt,10%),100%) );
+                }
+                //opacity: 0.9;
 
             }
         }

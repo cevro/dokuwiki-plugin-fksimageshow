@@ -5,300 +5,349 @@
  * @author     Michal Červeňák <miso@fykos.cz>
  */
 // must be run within Dokuwiki
-if (!defined('DOKU_INC')) {
+if(!defined('DOKU_INC')){
     die();
 }
+require 'fks_image.php';
 
 class helper_plugin_fksimageshow extends DokuWiki_Plugin {
 
     public $FKS_helper;
+    public $size_names;
+
+    /**
+     *
+     * @var array $sizes define sizey of pictures
+     */
+    private static $sizes = array(
+        'tera' => array(600,100),
+        'giga' => array(480,80),
+        'mega' => array(400,66,666666),
+        'kilo' => array(360,60),
+        'normal' => array(300,50),
+        'mili' => array(240,40),
+        'mikro' => array(200,33,333333),
+        'nano' => array(150,25),
+        'piko' => array(120,20)
+    );
 
     public function __construct() {
-
-
         $this->FKS_helper = $this->loadHelper('fkshelper');
-    }
 
-    
-
-}
-
-class fksimage extends helper_plugin_fksimageshow {
-
-    /**
-     *
-     * @var string path to style.ini
-     */
-    private $ini_file;
-
-    /**
-     *
-     * @var int filetime style.ini
-     */
-    private $ini_time;
-
-    /**
-     *
-     * @var array params of style.ini
-     */
-    private $ini_atr = array();
-
-    /**
-     * @var string name od season
-     */
-    public $season_name;
-
-    /**
-     *
-     * @var string folder to save images
-     */
-    private $season_dir;
-
-    /**
-     *
-     * @var string folder to default files
-     */
-    public $default_dir;
-
-    /**
-     *
-     * @var string path of defaul file
-     */
-    private $default_file;
-
-    /**
-     *
-     * @var int filetime of new file
-     */
-    private $file_time;
-
-    /**
-     * @var string path of new file
-     */
-    private $file_patch;
-
-    /**
-     *
-     * @var string name of file
-     */
-    private $file_name;
-
-    /**
-     *
-     * @var string type of file
-     */
-    private $file_ext;
-
-    /**
-     *
-     * @var array of new color
-     */
-    private $color_new;
-
-    /**
-     *
-     * @var array of old color
-     */
-    private $color_old;
-
-    /**
-     *
-     * @var int new red value
-     */
-    private $new_red;
-
-    /**
-     *
-     * @var int new green value
-     */
-    private $new_green;
-
-    /**
-     *
-     * @var int new blue value
-     */
-    private $new_blue;
-
-    /**
-     *
-     * @var int new alpha value
-     */
-    private $new_alpha;
-
-    /**
-     *
-     * @var int old red value
-     */
-    private $old_red;
-
-    /**
-     *
-     * @var int old rgreen value
-     */
-    private $old_green;
-
-    /**
-     *
-     * @var int old blue value
-     */
-    private $old_blue;
-
-    /**
-     *
-     * @var int old alpha value
-     */
-    private $old_alpha;
-
-    public function __construct($file, $type = null) {
-
-        global $conf;
-        $this->ini_file = DOKU_INC . 'lib/tpl/' . $conf['template'] . '/style.ini';
-        $this->ini_time = filemtime($this->ini_file);
-        $this->ini_atr = parse_ini_file($this->ini_file);
-        $this->season_name = $this->ini_atr['__season__'];
-        $this->season_dir = 'lib/tpl/' . $conf['template'] . '/images/season/' . $this->season_name . '/';
-        $this->default_dir = 'lib/tpl/' . $conf['template'] . '/images/season/default/';
-
-        if ($type) {
-            $this->file_ext = $type;
-            $this->file_name = $file;
-        } else {
-            $path = pathinfo($file);
-            $this->file_ext = $path['extension'];
-            $this->file_name = $path['filename'];
+        foreach (self::$sizes as $key => $v) {
+            $this->size_names[] = $key;
         }
-
-        $this->file_patch = DOKU_INC . $this->season_dir . $file . '.' . $type;
-        $this->file_time = @filemtime($this->file_patch);
     }
 
     /**
      * 
-     * @param type $file name of file without ext
-     * @param string $type od file jpg/png
-     * @return void
+     * @param type $images
+     * @param type $format
+     * @param type $label
+     * @return type
      */
-    
+    public static function FindImage($images,$format,$label) {
+        /*
+         * when is images empty 
+         */
 
-    /**
-     * @return void 
-     */
-    public function _colorize() {
-
-        if (!file_exists(DOKU_INC . $this->season_dir)) {
-            mkdir(DOKU_INC . $this->season_dir);
+        if(empty($images)){
+            return null;
         }
-
-        if ((!file_exists($this->file_patch) || ($this->file_time < $this->ini_time))) {
-            $this->_fks_colorize_img();
+        /*
+         * random key of array
+         */
+        $rand = array_rand($images);
+        $img = $images[$rand];
+        list($w,$h) = getimagesize($img);
+        /*
+         * is format ok ?
+         */
+        if($format == 'landscape'){
+            if($w < $h){
+                $img = self::FindImage($images,$format,$label);
+            }
+        }elseif($format == 'portrait'){
+            if($w > $h){
+                $img = self::FindImage($images,$format,$label);
+            }
         }
-        return;
+        return $img;
     }
 
     /**
      * 
-     * @return boolean
+     * @param type $img
+     * @param type $label
+     * @return string
      */
-    private function _fks_colorize_img() {
+    private static function CreateLabel($img,$label = "") {
 
-        $this->default_file = DOKU_INC . $this->default_dir . $this->file_name . '.' . $this->file_ext;
-        if ($this->file_ext == "png") {
-            $im = imagecreatefrompng($this->default_file);
-        } elseif ($this->file_ext == 'jpg' || $this->file_ext == 'jpeg') {
-            $im = imagecreatefromjpeg($this->default_file);
-        } else {
+        if(preg_match('/@exif/',$label)){
+            /**
+             * TODO!!!
+             */
+        }
+        return $label;
+    }
+
+    /**
+     * 
+     * @param type $gallerys
+     * @return type
+     */
+    public static function GetAllImages($gallerys) {
+        $files = Array();
+
+        foreach ($gallerys as $value) {
+
+            $dir = $value;
+            $filess = self::AllImage($dir);
+            $files = array_merge($files,$filess);
+        }
+
+        return $files;
+    }
+
+    /**
+     * 
+     * @param type $dir
+     * @return type
+     */
+    private static function AllImage($dir) {
+        $files = helper_plugin_fkshelper::filefromdir($dir,false);
+
+        if($files == null){
+            return array();
+        }
+        $filtred_files = array_filter($files,function($v) {
+            return is_array(@getimagesize($v));
+        });
+
+        return $filtred_files;
+    }
+
+    /**
+     * 
+     * @param type $images
+     * @param type $foto
+     * @param type $format
+     * @param type $label
+     * @return type
+     */
+    public static function ChooseImages($images,$foto = 1,$format = null,$label = "") {
+        if($images == null){
+            //msg('No images to dislay',-1,'','',MSG_USERS_ONLY);
             return;
         }
-
-        if (preg_match('/radioactive/i', $this->file_name)) {
-            $style_rgb = hexdec($this->ini_atr['__vyfuk_back__']);
-        } else {
-            $style_rgb = hexdec($this->ini_atr['__vyfuk_head__']);
+        for ($i = 0; $i < $foto; $i++) {
+            $choose[$i]['src'] = self::FindImage($images,$format,$label);
+            $choose[$i]['label'] = self::CreateLabel($choose[$i]['src'],$label);
         }
-        $this->_fks_repaint_img($im, $style_rgb);
-        ob_start();
-        if ($this->file_ext == "png") {
-            imagesavealpha($im, true);
-            imagepng($im);
-        } elseif ($this->file_ext == 'jpg' || $this->file_ext == 'jpeg') {
-            imagejpeg($im);
-        }
-        $contents = ob_get_contents();
-        imagedestroy($im);
-        ob_end_clean();
-        io_saveFile(DOKU_INC . $this->season_dir . $this->file_name . '.' . $this->file_ext, $contents);
 
+        return (array) $choose;
+    }
+
+    /**
+     * 
+     * @global type $ID
+     * @param type $mode
+     * @param Doku_Renderer $renderer
+     * @param type $data
+     * @return boolean
+     */
+    public function render($mode,Doku_Renderer &$renderer,$data) {
+        global $ID;
+        if($mode == 'xhtml'){
+
+            /** @var Do ku_Renderer_xhtml $renderer */
+            list(,$matches) = $data;
+            list($data) = $matches;
+            /**
+             * @TODO dorobiť pridavanie style a dalšíc atr;
+             */
+            $param = array('class' => 'FKS_image_show');
+            /**
+             * iné pre statické a iné pre slide
+             */
+            switch ($data['type']) {
+                case "static":
+                    $param = array_merge($param,array('data-animate' => 'static'));
+                    break;
+                case "slide":
+                    $param = array_merge($param,array('data-animate' => 'slide','data-rand' => $data['rand']));
+                    break;
+            }
+            /**
+             * for mini/mikro scale is smaller
+             */
+            list($img_size) = self::$sizes[$data['size']];
+            $param['class'].=' '.$data['size'];
+            /*
+             * set floating
+             */
+            switch ($data['position']) {
+                case "left":
+                    $param['class'].=' left';
+
+                    break;
+                case "right":
+                    $param['class'].=' right';
+
+                    break;
+                default :
+                    $param['class'].=' center';
+
+                    break;
+            }
+            $data['href'] = $this->GalleryLink($data['href'],$data['images'][0]['src']);
+
+            $renderer->doc .= html_open_tag('div',$param);
+            if($data['images'] == null){
+
+                if(auth_quickaclcheck($ID) >= AUTH_EDIT){
+
+                    $renderer->doc.='<div class="info">FKS_imageshow: No images find</div>';
+                }
+            }else{
+                if($data['type'] == 'slide'){
+                    $this->PrintScript($renderer,$data['images'],$data,$data['foto'],$data['rand'],$data['href'],$img_size);
+                }
+                foreach ($data['images']as $value) {
+
+                    $renderer->doc .= html_open_tag('div',array('class' => 'image_show'));
+                    $renderer->doc .= html_open_tag('div',array('class' => 'images'));
+
+                    $renderer->doc .= html_open_tag('a',array('href' => $data['href']));
+                    $renderer->doc .= self::MakeImage($value['src'],$img_size);
+                    $renderer->doc .= self::MakeLabel($value['label']);
+                    $renderer->doc .= html_close_tag('a');
+                    $renderer->doc .= html_close_tag('div');
+                    $renderer->doc .= html_close_tag('div');
+                }
+            }
+        }
+        $renderer->doc .=html_close_tag('div');
+        return false;
+    }
+
+    /**
+     * 
+     * @param type $image
+     * @param type $img_size
+     * @return type
+     */
+    private static function MakeImage($image,$img_size) {
+        $r .= html_open_tag('div',array('class' => 'image','style' => 'background-image: url(\''.self::MediaLink($image,$img_size).'\')'));
+        $r .= html_close_tag('div');
+        return $r;
+    }
+
+    /**
+     * 
+     * @param type $label
+     * @return string
+     */
+    private static function MakeLabel($label) {
+        if($label == null){
+            return '';
+        }
+        $r.= html_open_tag('div',array('class' => 'title'));
+        $r .= html_open_tag('h2',array());
+        $r.= $label;
+        $r.= html_close_tag('h2');
+        $r.= html_close_tag('div');
+        return $r;
+    }
+
+    /**
+     * 
+     * @param type $renderer
+     * @param type $images
+     * @param array $data
+     * @param type $foto
+     * @param type $rand
+     * @param type $href
+     * @param type $size
+     * @param type $label
+     * @return boolean
+     */
+    private function PrintScript(&$renderer,$images,&$data,$foto = 1,$rand = "",$href = false,$size = 300) {
+        $no = 0;
+        $renderer->doc.= '<script type="text/javascript"> files["'.$rand.'"]={"images":'.$foto;
+        foreach ($images as $value) {
+            $renderer->doc.='
+                    ,'.$no.':{
+                    "label":"'.$value['label'].'",
+                    "href":"'.$href.'",
+                    "src":"'.self::MediaLink($value['src'],$size).'"}';
+            $no++;
+        }
+        $renderer->doc.='}'.html_close_tag('script');
+        $first = $data['images'][0];
+        unset($data['images']);
+        $data['images'][0] = $first;
         return true;
     }
 
     /**
      * 
-     * @global type $conf
-     * @param string $file file name or full name of file
-     * @param string $type extenson of file
-     * @param bool $dis_scan fix for inf cycle
-     * @return string path of repaint file
+     * @param type $link
+     * @param type $size
+     * @return type
      */
-    public static function _fks_season_image($file, $type = null, $dis_scan = false) {
+    private static function MediaLink($link,$size = 300) {
+        return ml(str_replace(array(DOKU_INC,'data/media'),'',$link),array('w' => $size),true,'&');
+    }
+
+    private function GalleryLink($href = null,$link = '') {
         global $conf;
-        $image = new fksimage($file, $type);
-        
-        $image->_colorize();
-        if (!$dis_scan) {
-            foreach (scandir(DOKU_INC . $image->default_dir) as $value) {
-
-                $more_file = pathinfo(DOKU_INC . $image->default_dir . $value);
-
-                fksimage::_fks_season_image($more_file['filename'], $more_file['extension'], true);
-            }
+        if(!$this->getConf('allow_url')){
+            return '#';
         }
-        return DOKU_BASE . 'lib/tpl/' . $conf['template'] . '/images/season/' . $image->season_name . '/' . $file . '.' . $type;
+        if($href){
+            return wl(cleanID($href));
+        }
+        $path = pathinfo($link);
+        $matches = array();
+        preg_match('|'.$conf['mediadir'].'[/](.*)|',$path['dirname'],$matches);
+        list(,$path_from_media) = $matches;
+        unset($matches);
+        $wiki_from_media = str_replace('/',':',$path_from_media);
+        if($this->getConf('pref_delete')){
+            preg_match('|[:]?'.$this->getConf('pref_delete').'[:](.*)|',$wiki_from_media,$matches);
+            list(,$wiki_from_media) = $matches;
+            unset($matches);
+        }
+        if($this->getConf('sulf_delete')){
+            preg_match('|\A(.*)[:]'.$this->getConf('sulf_delete').'[:]*\z|',$wiki_from_media,$matches);
+            list(,$wiki_from_media) = $matches;
+            unset($matches);
+        }
+        if($this->getConf('pref_add')){
+            $wiki_from_media = $this->getConf('pref_add').':'.$wiki_from_media;
+        }
+        if($this->getConf('sulf_add')){
+            $wiki_from_media = $wiki_from_media.':'.$this->getConf('sulf_add');
+        }
+        return wl(cleanID($wiki_from_media));
     }
 
     /**
      * 
-     * @param image $im
-     * @param color $style_rgb
-     * @return void
+     * @param type $match
+     * @return string
      */
-    private function _fks_repaint_img(&$im, $style_rgb) {
-        
-        list($w, $h) = getimagesize($this->default_file);
-        $this->color_new = imagecolorsforindex($im, $style_rgb);
-        for ($i = 0; $i < $w; $i++) {
-            for ($j = 0; $j < $h; $j++) {
-                $rgb = imagecolorat($im, $i, $j);
-                $this->color_old = imagecolorsforindex($im, $rgb);
-                foreach (array('red', 'green', 'blue', 'alpha')as $value) {
-                    
-                    $this->{"new_" . $value} = $this->color_new[$value];
-                    $this->{"old_" . $value} = $this->color_old[$value];
-                }
-                if ($this->_can_paint()) {
-                    $color = imagecolorallocate($im, $this->new_red, $this->new_green, $this->new_blue);
-                    imagesetpixel($im, $i, $j, $color);
-                }
-            }
+    public static function FindPosition($match) {
+        if(preg_match('/\s+(.+)\s+/',$match)){
+            return 'center';
+        }elseif(preg_match('/(.+)\s+/',$match)){
+            return 'left';
+        }elseif(preg_match('/\s+(.+)/',$match)){
+            return 'right';
+        }else{
+            return 'center';
         }
-        return;
-    }
-
-    /**
-     * 
-     * @return boolean
-     */
-    private function _can_paint() {
-        $white = (
-                ($this->old_red != 255) ||
-                ($this->old_green != 255) ||
-                ($this->old_blue != 255)
-                );
-        $same = (
-                ($this->old_red != $this->new_red) ||
-                ($this->old_green != $this->new_green) ||
-                ($this->old_blue != $this->new_blue));
-
-        return (boolean) ($this->old_alpha != 127) && $white && $same;
     }
 
 }
