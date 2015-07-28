@@ -9,16 +9,14 @@ if(!defined('DOKU_INC')){
     die();
 }
 
-class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
+class syntax_plugin_fksimageshow_carusel extends DokuWiki_Syntax_Plugin {
 
-    private static $size_names ;
+    private static $size_names;
     private $helper;
-
-
 
     public function __construct() {
         $this->helper = $this->loadHelper('fksimageshow');
-         self::$size_names = $this->helper->size_names;
+        self::$size_names = $this->helper->size_names;
     }
 
     public function getType() {
@@ -38,13 +36,14 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
     }
 
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('\{\{[a-z-]*il\>.+?\}\}',$mode,'plugin_fksimageshow_il');
+        $this->Lexer->addSpecialPattern('\{\{[a-z-]*carusel\>.+?\}\}',$mode,'plugin_fksimageshow_carusel');
     }
 
     /**
      * Handle the match
      */
     public function handle($match,$state) {
+
         $data = array();
         /**
          * @data[type] static / slide / ?,
@@ -59,27 +58,45 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
          * @data[random] /all/one/??
          */
         $data['size'] = 'normal';
-        $data['foto'] = 1;
+
         $data['position'] = 'center';
         $data['format'] = null;
-        $data['type'] = 'static';
-        $data['images'] = array();
-        $matches = array();
-        preg_match('/\{\{(([a-z]*)-)?il\>(.+?)\}\}/',$match,$matches);
-        list(,,$p1,$p) = $matches;
-        list($params['gallery'],$href,$label) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$p);
-        $data['position'] = helper_plugin_fksimageshow::FindPosition($params['gallery']);
-        
+        $data['type'] = 'slide';
 
+        $data['images'] = array();
+        $params = array();
+
+        $matches = array();
+        preg_match('/\{\{(([a-z]*)-)?carusel\>/',$match,$matches);
+        list(,,$p1) = $matches;
         if(in_array($p1,self::$size_names)){
             $data['size'] = $p1;
         }
+
+        // ;
+
+
+        $es = explode("\n",$match);
+        foreach ($es as $e) {
+            if(preg_match('/.*?\|.*?\|.*?/',$e)){
+                list($g,$href,$l) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$e);
+                $gallerys[] = DOKU_INC.'data/media/'.trim($g);
+
+                $images = helper_plugin_fksimageshow::GetAllImages($gallerys);
+                $params['images'][] = helper_plugin_fksimageshow::ChooseImages($images,1,null,$l,$href);
+            }
+        }
         
-        $data['type'] = 'static';
-        $gallerys[] = DOKU_INC.'data/media/'.trim($params['gallery']);
-        $images = helper_plugin_fksimageshow::GetAllImages($gallerys);
-        $data['images'] = helper_plugin_fksimageshow::ChooseImages($images,1,null,$label,$href);
-        
+        foreach ($params['images']as $image){
+            
+            $data['images'][]=$image[0];
+        }
+        $data['rand'] = helper_plugin_fkshelper::_generate_rand(5);
+        $data['foto'] = count($data['images']);
+
+       
+
+
         return array($state,array($data));
     }
 

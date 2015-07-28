@@ -135,7 +135,7 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
      * @param type $label
      * @return type
      */
-    public static function ChooseImages($images,$foto = 1,$format = null,$label = "") {
+    public static function ChooseImages($images,$foto = 1,$format = null,$label = "",$href=null) {
         if($images == null){
             //msg('No images to dislay',-1,'','',MSG_USERS_ONLY);
             return;
@@ -143,6 +143,9 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
         for ($i = 0; $i < $foto; $i++) {
             $choose[$i]['src'] = self::FindImage($images,$format,$label);
             $choose[$i]['label'] = self::CreateLabel($choose[$i]['src'],$label);
+            if($href!=null){
+                 $choose[$i]['href'] = $href;
+            }
         }
 
         return (array) $choose;
@@ -200,7 +203,7 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
 
                     break;
             }
-            $data['href'] = $this->GalleryLink($data['href'],$data['images'][0]['src']);
+            
 
             $renderer->doc .= html_open_tag('div',$param);
             if($data['images'] == null){
@@ -214,11 +217,12 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
                     $this->PrintScript($renderer,$data['images'],$data,$data['foto'],$data['rand'],$data['href'],$img_size);
                 }
                 foreach ($data['images']as $value) {
+                    $value['href'] = $this->GalleryLink($value['href'],$data['images'][0]['src']);
 
                     $renderer->doc .= html_open_tag('div',array('class' => 'image_show'));
                     $renderer->doc .= html_open_tag('div',array('class' => 'images'));
 
-                    $renderer->doc .= html_open_tag('a',array('href' => $data['href']));
+                    $renderer->doc .= html_open_tag('a',array('href' => $value['href']));
                     $renderer->doc .= self::MakeImage($value['src'],$img_size);
                     $renderer->doc .= self::MakeLabel($value['label']);
                     $renderer->doc .= html_close_tag('a');
@@ -254,7 +258,7 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
         }
         $r.= html_open_tag('div',array('class' => 'title'));
         $r .= html_open_tag('h2',array());
-        $r.= $label;
+        $r.= p_render('xhtml',p_get_instructions($label),$info);
         $r.= html_close_tag('h2');
         $r.= html_close_tag('div');
         return $r;
@@ -273,9 +277,15 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
      * @return boolean
      */
     private function PrintScript(&$renderer,$images,&$data,$foto = 1,$rand = "",$href = false,$size = 300) {
+        
+        
         $no = 0;
         $renderer->doc.= '<script type="text/javascript"> files["'.$rand.'"]={"images":'.$foto;
         foreach ($images as $value) {
+            if(array_key_exists('href',$value)){
+            $href=$value['href'];
+            
+        }
             $renderer->doc.='
                     ,'.$no.':{
                     "label":"'.$value['label'].'",
@@ -306,6 +316,7 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
             return '#';
         }
         if(preg_match('|\Ahttp://|',$href)||preg_match('|\Ahttps://|',$href)){
+            
             return $href;
         }
         if($href){

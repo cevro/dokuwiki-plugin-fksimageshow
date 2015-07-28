@@ -85,9 +85,9 @@ class syntax_plugin_fksimageshow_al extends DokuWiki_Syntax_Plugin {
         /**
          * for slide muss generate rand
          */
-        if($data['type'] == 'slide'){
+      
             $data['rand'] = helper_plugin_fkshelper::_generate_rand(5);
-        }
+       
 
 
         /**
@@ -98,7 +98,7 @@ class syntax_plugin_fksimageshow_al extends DokuWiki_Syntax_Plugin {
         }
 
         $images = helper_plugin_fksimageshow::GetAllImages($gallerys);
-        $data['images'] = helper_plugin_fksimageshow::ChooseImages($images,$data['foto'],null,$label);
+        $data['images'] = helper_plugin_fksimageshow::ChooseImages($images,$data['foto'],null,$label,$data['href']);
         return array($state,array($data));
     }
 
