@@ -38,7 +38,7 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
     }
 
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('\{\{[a-z-]*il\>.+?\}\}',$mode,'plugin_fksimageshow_il');
+        $this->Lexer->addSpecialPattern('\{\{[a-zX-]*il\>.+?\}\}',$mode,'plugin_fksimageshow_il');
     }
 
     /**
@@ -65,7 +65,7 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
         $data['type'] = 'static';
         $data['images'] = array();
         $matches = array();
-        preg_match('/\{\{(([a-z]*)-)?il\>(.+?)\}\}/',$match,$matches);
+        preg_match('/\{\{(([Xa-z]*)-)?il\>(.+?)\}\}/',$match,$matches);
         list(,,$p1,$p) = $matches;
         list($params['gallery'],$href,$label) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$p);
         $data['position'] = helper_plugin_fksimageshow::FindPosition($params['gallery']);

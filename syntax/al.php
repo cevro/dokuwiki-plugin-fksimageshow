@@ -37,7 +37,7 @@ class syntax_plugin_fksimageshow_al extends DokuWiki_Syntax_Plugin {
     }
 
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('\{\{[a-z0-9-]*al\>.+?\}\}',$mode,'plugin_fksimageshow_al');
+        $this->Lexer->addSpecialPattern('\{\{[a-zX0-9-]*al\>.+?\}\}',$mode,'plugin_fksimageshow_al');
     }
 
     /**
@@ -64,7 +64,7 @@ class syntax_plugin_fksimageshow_al extends DokuWiki_Syntax_Plugin {
         $data['type'] = 'slide';
         $data['images'] = array();
         $matches = array();
-        preg_match('/\{\{(([a-z0-9]*)-)?(([a-z0-9]*)-)?al\>(.+?)\}\}/',$match,$matches);
+        preg_match('/\{\{(([Xa-z0-9]*)-)?(([a-z0-9]*)-)?al\>(.+?)\}\}/',$match,$matches);
         list(,,$p2,,$p1,$p) = $matches;
         list($g,$data['href'],$label) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$p);
         $params['gallery'] = explode(';',$g);
