@@ -70,10 +70,8 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
         list($params['gallery'],$href,$label) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$p);
         $data['position'] = helper_plugin_fksimageshow::FindPosition($params['gallery']);
         
-
-        if(in_array($p1,self::$size_names)){
-            $data['size'] = $p1;
-        }
+$data['size']=$this->helper->FindSize($p1);
+        
         
         $data['type'] = 'static';
         $gallerys[] = DOKU_INC.'data/media/'.trim($params['gallery']);

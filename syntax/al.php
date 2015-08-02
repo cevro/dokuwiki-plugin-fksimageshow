@@ -71,23 +71,17 @@ class syntax_plugin_fksimageshow_al extends DokuWiki_Syntax_Plugin {
         $data['position'] = helper_plugin_fksimageshow::FindPosition($g);
         if(preg_match('/[0-9]+/',$p1)){
             $data['foto'] = $p1;
-        }
-        if(preg_match('/[0-9]+/',$p2)){
+            $data['size'] = $this->helper->FindSize($p2);
+        }else{
             $data['foto'] = $p2;
+            $data['size'] = $this->helper->FindSize($p1);
         }
 
-        if(in_array($p1,self::$size_names)){
-            $data['size'] = $p1;
-        }
-        if(in_array($p2,self::$size_names)){
-            $data['size'] = $p2;
-        }
         /**
          * for slide muss generate rand
          */
-      
-            $data['rand'] = helper_plugin_fkshelper::_generate_rand(5);
-       
+        $data['rand'] = helper_plugin_fkshelper::_generate_rand(5);
+
 
 
         /**
