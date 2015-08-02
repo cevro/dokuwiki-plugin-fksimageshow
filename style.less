@@ -6,7 +6,7 @@
 
 @media  (max-width:419px){
     .FKS_image_show{
-        &.tera,&.giga,&.mega,&kilo,&.normal,&.mili,&.mikro,&.nano,&.piko{
+        &.w_tera,&.w_giga,&.w_mega,&.w_kilo,&.w_normal,&.w_mili,&.w_mikro,&.w_nano,&.w_piko{
             width:100%;
             .images{
                 height: 300px;
@@ -17,10 +17,9 @@
         }
     }
 }
-
 @media  (min-width:420px)and(max-width:599px){
     .FKS_image_show{
-        &.tera,&.giga,&.mega,&kilo{
+        &.w_tera,&.w_giga,&.w_mega,&.w_kilo{
             width:100%;
             .images{
                 height: 300px;
@@ -29,7 +28,7 @@
                 }
             }
         }        
-        &.normal,&.mili,&.mikro,&.nano,&.piko{
+        &.w_normal,&.w_mili,&.w_mikro,&.w_nano,&.w_piko{
             width:50%;
             .images{
                 height: 150px;
@@ -42,98 +41,95 @@
 }
 @media (min-width:600px){
     .FKS_image_show{
-        &.tera{
-            width:100%;
-            .images{
-                height: 600px;
-                h2{
-                    font-size: 200%;
-                }
-            }
+        &.w_tera{
+            width:100%;            
         }
-        &.giga{
-            width:80%;
-            .images{
-                height: 480px;
-                h2{
-                    font-size: 180%;
-                }
-            }
+        &.w_giga{
+            width:80%;            
         }
-        &.mega{
-            width:66.66666%;
-            .images{
-                height: 400px;
-                h2{
-                    font-size: 166%;
-                }
-            }
+        &.w_mega{
+            width:66.66666%;           
         }
-        &.kilo{
-            width:60%;
-            .images{
-                height: 360px;
-                h2{
-                    font-size: 160%;
-                }
-            }
+        &.w_kilo{
+            width:60%;            
         }
-
-        &.normal{
-            width:50%;
-            .images{
-                height: 300px;
-                h2{
-                    font-size: 150%;
-                }
-            }
+        &.w_normal{
+            width:50%;            
         }
-
-        &.mili{
-            width:40%;
-            .images{
-                height: 240px;
-                h2{
-                    font-size: 140%;
-                }
-            }
+        &.w_mili{
+            width:40%;            
         }
-
-        &.mikro{
-            width:33.3333333%;
-            .images{
-                height: 200px;  
-                h2{
-                    font-size: 133%;
-                }
-            }
+        &.w_mikro{
+            width:33.3333333%;            
         }
-        &.nano{
+        &.w_nano{
             width:25%;
-            .images{
-                height: 150px; 
-                h2{
-                    font-size: 125%;
-                }
+        }
+        &.w_piko{
+            width:20%;           
+        }
+    }
+}
+@media (min-width:600px){
+    .FKS_image_show{
+        &.h_tera .images{
+            height: 600px;
+            h2{
+                font-size: 200%;
             }
         }
-        &.piko{
-            width:20%;
-            .images{
-                height: 120px; 
-                h2{
-                    font-size: 120%;
-                }
+        &.h_giga .images{
+            height: 480px;
+            h2{
+                font-size: 180%;
+            }
+        }
+        &.h_mega .images{
+            height: 400px;
+            h2{
+                font-size: 166%;
+            }
+        }
+        &.h_kilo .images{
+            height: 360px;
+            h2{
+                font-size: 160%;
+            }
+        }
+        &.h_normal .images{
+            height: 300px;
+            h2{
+                font-size: 150%;
+            }
+        }
+        &.h_mili .images{
+            height: 240px;
+            h2{
+                font-size: 140%;
+            }
+        }
+        &.h_mikro .images{
+            height: 200px;  
+            h2{
+                font-size: 133%;
+            }
+        }
+        &.h_nano .images{
+            height: 150px; 
+            h2{
+                font-size: 125%;
+            }
+        }
+        &.h_piko .images{
+            height: 120px; 
+            h2{
+                font-size: 120%;
             }
         }
     }
-
 }
-
 .FKS_image_show{
     padding:0;
-
-
     &.left{
         float:left;
     }
@@ -141,19 +137,16 @@
         float:right;
     }
     &.center{
-        //clear: both;
-        /*TODO!!!*/
+        margin-left: auto;
+        margin-right: auto;
     }
     .image_show{
         padding:0.5em;
         overflow:hidden;
-
         .images{
             margin-top: -1em;
-            position:relative;         
-
+            position:relative;
             .image{
-
                 background-size: cover;
                 background-position-y:50%;
                 height: 100%;
@@ -169,21 +162,13 @@
                     margin-top:.5em;
                     padding-left: .5em;
                     padding-right: .5em;
-
                 }
             }
             &:hover{ 
                 .title{
-
                     background-image: linear-gradient(fade(darken(@ini_text_alt,10%),50%), fade(darken(@ini_text_alt,10%),100%) );
                 }
-                //opacity: 0.9;
-
             }
         }
     }
 }
-
-
-
-

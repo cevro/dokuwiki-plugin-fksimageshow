@@ -36,7 +36,7 @@ class syntax_plugin_fksimageshow_carusel extends DokuWiki_Syntax_Plugin {
     }
 
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('\{\{[a-z-]*carusel\>.+?\}\}',$mode,'plugin_fksimageshow_carusel');
+        $this->Lexer->addSpecialPattern('\{\{[a-zX-]*carusel\>.+?\}\}',$mode,'plugin_fksimageshow_carusel');
     }
 
     /**
@@ -67,21 +67,15 @@ class syntax_plugin_fksimageshow_carusel extends DokuWiki_Syntax_Plugin {
         $params = array();
 
         $matches = array();
-        preg_match('/\{\{(([a-z]*)-)?carusel\>/',$match,$matches);
+        preg_match('/\{\{(([Xa-z]*?)-)?carusel\>/',$match,$matches);
         list(,,$p1) = $matches;
-        if(in_array($p1,self::$size_names)){
-            $data['size'] = $p1;
-        }
-
-        // ;
-
-
+        $data['size']=$this->helper->FindSize($p1);
         $es = explode("\n",$match);
         foreach ($es as $e) {
             if(preg_match('/.*?\|.*?\|.*?/',$e)){
-                list($g,$href,$l) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$e);
+                list($g,$href,$l) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$e,3);
+                var_dump($l);
                 $gallerys[] = DOKU_INC.'data/media/'.trim($g);
-
                 $images = helper_plugin_fksimageshow::GetAllImages($gallerys);
                 $params['images'][] = helper_plugin_fksimageshow::ChooseImages($images,1,null,$l,$href);
             }

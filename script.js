@@ -24,7 +24,7 @@ jQuery(function () {
             $bg_img.css({"background-image": "url('" + files[rand][next]['src'] + "')"});
             $bg_img.parent().attr("href", files[rand][next]['href']);
             $('<img/>').attr('src', files[rand][next]['src']).load(function () {
-                $bg_img.parents().find('.title').find('h2').find('p').html(files[rand][next]['label']);
+                $bg_img.parents().find('.title').find('h2').html(files[rand][next]['label']);
                 $(this).remove();
                 $bg_img.parents().find('.title').find('h2').animate({opacity: 1}, TIME_TRANSLATION, function () {
                 });
