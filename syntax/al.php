@@ -67,14 +67,17 @@ class syntax_plugin_fksimageshow_al extends DokuWiki_Syntax_Plugin {
         preg_match('/\{\{(([Xa-z0-9]*)-)?(([a-z0-9]*)-)?al\>(.+?)\}\}/',$match,$matches);
         list(,,$p2,,$p1,$p) = $matches;
         list($g,$data['href'],$label) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$p);
-        $params['gallery'] = explode(';',$g);
+        $params['gallery'] = explode(';',trim($g));
         $data['position'] = helper_plugin_fksimageshow::FindPosition($g);
         if(preg_match('/[0-9]+/',$p1)){
             $data['foto'] = $p1;
             $data['size'] = $this->helper->FindSize($p2);
-        }else{
+        }elseif(preg_match('/[0-9]+/',$p2)){
             $data['foto'] = $p2;
             $data['size'] = $this->helper->FindSize($p1);
+        }else{
+             $data['size'] = $this->helper->FindSize("");
+             $data['foto']=3;
         }
 
         /**
@@ -93,6 +96,7 @@ class syntax_plugin_fksimageshow_al extends DokuWiki_Syntax_Plugin {
 
         $images = helper_plugin_fksimageshow::GetAllImages($gallerys);
         $data['images'] = helper_plugin_fksimageshow::ChooseImages($images,$data['foto'],null,$label,$data['href']);
+        
         return array($state,array($data));
     }
 

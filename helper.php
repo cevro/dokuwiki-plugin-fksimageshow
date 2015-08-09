@@ -14,7 +14,6 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
 
     public $FKS_helper;
     public $size_names;
-    
 
     /**
      *
@@ -34,11 +33,7 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
 
     public function __construct() {
         $this->FKS_helper = $this->loadHelper('fkshelper');
-
-        foreach (self::$sizes as $key => $v) {
-            $this->size_names[] = $key;
-        }
-        
+        $this->size_names = array_keys(self::$sizes);
     }
 
     /**
@@ -85,11 +80,18 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
      */
     private static function CreateLabel($img,$label = "") {
 
-        if(preg_match('/@exif/',$label)){
-            /**
-             * TODO!!!
-             */
+        if(preg_match('/@headline@/',$label)){
+            $JpegMeta = new JpegMeta($img);
+            $t = $JpegMeta->getRawInfo();
+
+            $label = str_replace('@headline@',$t['iptc']['Headline'],$label);
         }
+        if(preg_match('/@caption@/',$label)){
+            $JpegMeta = new JpegMeta($img);
+            $t = $JpegMeta->getRawInfo();
+            $label = str_replace('@caption@',$t['iptc']['Caption'],$label);
+        }
+
         return $label;
     }
 
@@ -142,7 +144,7 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
             //msg('No images to dislay',-1,'','',MSG_USERS_ONLY);
             return;
         }
-        $choose=array();
+        $choose = array();
         for ($i = 0; $i < $foto; $i++) {
             $choose[$i]['src'] = self::FindImage($images,$format,$label);
             $choose[$i]['label'] = self::CreateLabel($choose[$i]['src'],$label);
@@ -184,13 +186,23 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
                     $param = array_merge($param,array('data-animate' => 'slide','data-rand' => $data['rand']));
                     break;
             }
-            /**
-             * for mini/mikro scale is smaller
-             */
+
+
+            if(!is_array($data['size'])){
+
+                $size = $data['size'];
+                $data['size'] = array();
+                $data['size']['w'] = $size;
+                $data['size']['h'] = $size;
+            }
+
+
+            $param['class'].=' w_'.$data['size']['w'].' h_'.$data['size']['h'];
             list($img_size) = self::$sizes[$data['size']['w']];
+
+
             /* specific scale for webpage */
             $img_size*=2;
-            $param['class'].=' w_'.$data['size']['w'].' h_'.$data['size']['h'];
             /*
              * set floating
              */
@@ -218,24 +230,32 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
                     $renderer->doc.='<div class="info">FKS_imageshow: No images find</div>';
                 }
             }else{
-                $data['images']=  array_map(function($a){
-                    $info=array();                   
-                    return array('label'=>p_render("xhtml",p_get_instructions($a['label']),$info),'href'=>$a['href'],'src'=>$a['src']);
+                $t = $this;
+                $data['images'] = array_map(function($a)use ($mode,$t) {
+                    $info = array();
+                    if(mb_strlen($a['label']) > 25){
+                        $l = mb_strcut($a['label'],0,22).'...';
+                    }else{
+                        $l = $a['label'];
+                    }
+                    return array('label' => p_render($mode,p_get_instructions($l),$info),
+                        'href' => $t->GalleryLink($a['href'],$a['src']),
+                        'src' => $a['src']);
                 },$data['images']);
-                
-                
+
+
                 if($data['type'] == 'slide'){
-                    $this->PrintScript($renderer,$data['images'],$data,$data['foto'],$data['rand'],$data['href'],$img_size);
+                    self::PrintScript($renderer,$data['images'],$data,$data['foto'],$data['rand'],$data['href'],$img_size);
                 }
                 foreach ($data['images']as $value) {
-                    $value['href'] = $this->GalleryLink($value['href'],$data['images'][0]['src']);
+
 
                     $renderer->doc .= html_open_tag('div',array('class' => 'image_show'));
                     $renderer->doc .= html_open_tag('div',array('class' => 'images'));
 
                     $renderer->doc .= html_open_tag('a',array('href' => $value['href']));
-                    $renderer->doc .= self::MakeImage($value['src'],$img_size);
-                    $renderer->doc .= self::MakeLabel($value['label']);
+                    self::PrintImage($renderer,$value['src'],$img_size);
+                    self::PrintLabel($renderer,$value['label']);
                     $renderer->doc .= html_close_tag('a');
                     $renderer->doc .= html_close_tag('div');
                     $renderer->doc .= html_close_tag('div');
@@ -252,10 +272,9 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
      * @param type $img_size
      * @return type
      */
-    private static function MakeImage($image,$img_size) {
-        $r .= html_open_tag('div',array('class' => 'image','style' => 'background-image: url(\''.self::MediaLink($image,$img_size).'\')'));
-        $r .= html_close_tag('div');
-        return $r;
+    private static function PrintImage(Doku_Renderer &$renderer,$image,$img_size = 200) {
+        $renderer->doc .= html_open_tag('div',array('class' => 'image','style' => 'background-image: url(\''.self::MediaLink($image,$img_size).'\')'));
+        $renderer->doc .= html_close_tag('div');
     }
 
     /**
@@ -263,16 +282,16 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
      * @param type $label
      * @return string
      */
-    private static function MakeLabel($label) {
+    private static function PrintLabel(Doku_Renderer &$renderer,$label = "") {
         if($label == null){
-            return '';
+            //    return '';
         }
-        $r.= html_open_tag('div',array('class' => 'title'));
-        $r .= html_open_tag('h2',array());
-        $r.= $label;
-        $r.= html_close_tag('h2');
-        $r.= html_close_tag('div');
-        return $r;
+        $renderer->doc .= html_open_tag('div',array('class' => 'title'));
+        $renderer->doc .= html_open_tag('h2',array());
+        $renderer->doc .= $label;
+
+        $renderer->doc .= html_close_tag('h2');
+        $renderer->doc .= html_close_tag('div');
     }
 
     /**
@@ -287,7 +306,7 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
      * @param type $label
      * @return boolean
      */
-    private function PrintScript(Doku_Renderer &$renderer,$images,&$data,$foto = 1,$rand = "",$href = false,$size = 300) {
+    private static function PrintScript(Doku_Renderer &$renderer,$images,&$data,$foto = 1,$rand = "",$href = false,$size = 300) {
         $no = 0;
         $j['images'] = $foto;
         foreach ($images as $value) {
@@ -319,9 +338,7 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
 
     private function GalleryLink($href = null,$link = '') {
         global $conf;
-        if(!$this->getConf('allow_url')){
-            return '#';
-        }
+
         if(preg_match('|http://|',$href) || preg_match('|https://|',$href)){
 
             return $href;
@@ -370,28 +387,27 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
             return 'center';
         }
     }
-    public function FindSize($match){
-        $matches=array();
+
+    public function FindSize($match = "") {
+        $matches = array();
         if(preg_match('/([a-z]*)X([a-z]*)/',$match,$matches)){
-            
-            list(,$w,$h)=$matches;
-            
+
+            list(,$w,$h) = $matches;
         }else{
-            $w=$h==$match;
-            
+            $w = $h = $match;
         }
-        $r=array();
+        $r = array();
         if(in_array($w,$this->size_names)){
-            $r['w']= $w;
+            $r['w'] = $w;
         }else{
-            $r['w']= 'normal';
+            $r['w'] = 'normal';
         }
         if(in_array($h,$this->size_names)){
-            $r['h']= $h;
+            $r['h'] = $h;
         }else{
-            $r['h']= 'normal';
+            $r['h'] = 'normal';
         }
-        
+
         return $r;
     }
 
