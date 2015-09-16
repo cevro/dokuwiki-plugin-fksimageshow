@@ -226,8 +226,10 @@ class helper_plugin_fksimageshow extends DokuWiki_Plugin {
             if($data['images'] == null){
 
                 if(auth_quickaclcheck($ID) >= AUTH_EDIT){
-
                     $renderer->doc.='<div class="info">FKS_imageshow: No images find</div>';
+                }
+                if($data['href']){
+                    $renderer->doc.='<a href="'.$this->GalleryLink($data['href']).'">'.$data['label'].'</a>';
                 }
             }else{
                 $t = $this;

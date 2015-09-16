@@ -11,14 +11,12 @@ if(!defined('DOKU_INC')){
 
 class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
 
-    private static $size_names ;
+    private static $size_names;
     private $helper;
-
-
 
     public function __construct() {
         $this->helper = $this->loadHelper('fksimageshow');
-         self::$size_names = $this->helper->size_names;
+        self::$size_names = $this->helper->size_names;
     }
 
     public function getType() {
@@ -69,15 +67,20 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
         list(,,$p1,$p) = $matches;
         list($params['gallery'],$href,$label) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$p);
         $data['position'] = helper_plugin_fksimageshow::FindPosition($params['gallery']);
-        
-$data['size']=$this->helper->FindSize($p1);
-        
-        
+        $data['href'] = $href;
+        $data['label'] = $label;
+        $data['size'] = $this->helper->FindSize($p1);
+
+
         $data['type'] = 'static';
         $gallerys[] = DOKU_INC.'data/media/'.trim($params['gallery']);
         $images = helper_plugin_fksimageshow::GetAllImages($gallerys);
         $data['images'] = helper_plugin_fksimageshow::ChooseImages($images,1,null,$label,$href);
-        
+        if($data['images']){
+            unset($data['href']);
+            unset($data['label']);
+        }
+
         return array($state,array($data));
     }
 
