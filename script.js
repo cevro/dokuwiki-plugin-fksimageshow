@@ -28,7 +28,7 @@ jQuery(function () {
         var rand = $div.data('rand');
         var $bg_img = $('.image', $div);
         var $a = $bg_img.parent();
-        var $title = $bg_img.parent().find('.title').find('h2');
+        var $title = $bg_img.parent().find('.title').find('span');
 
         window.setTimeout(function () {
             SlideNext($bg_img, $a, $title, rand, 0);

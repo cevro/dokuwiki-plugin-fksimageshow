@@ -8,6 +8,8 @@
 if(!defined('DOKU_INC')){
     die();
 }
+require_once(DOKU_INC.'inc/search.php');
+require_once(DOKU_INC.'inc/JpegMeta.php');
 
 class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
 
@@ -28,7 +30,7 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
     }
 
     public function getAllowedTypes() {
-        return array('formatting','substition','disabled');
+        return array();
     }
 
     public function getSort() {
@@ -43,50 +45,54 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
      * Handle the match
      */
     public function handle($match,$state) {
-        $data = array();
-        /**
-         * @data[type] static / slide / ?,
-         * @data[size] normal/mini;
-         * @data[href] link to galery
-         * @params[gallery]  path to galery relative from data/media
-         * @var $data ['images']
-         * @data[path]
-         * 
-         * @data[foto] 
-         * @data[label] text 
-         * @data[random] /all/one/??
-         */
-        $data['size'] = 'normal';
-        $data['foto'] = 1;
-        $data['position'] = 'center';
-        $data['format'] = null;
-        $data['type'] = 'static';
-        $data['images'] = array();
         $matches = array();
         preg_match('/\{\{(([Xa-z]*)-)?il\>(.+?)\}\}/',$match,$matches);
         list(,,$p1,$p) = $matches;
-        list($params['gallery'],$href,$label) = preg_split('~(?<!\\\)'.preg_quote('|','~').'~',$p);
-        $data['position'] = helper_plugin_fksimageshow::FindPosition($params['gallery']);
-        $data['href'] = $href;
-        $data['label'] = $label;
+        $data = $this->helper->parseIlData($p);
         $data['size'] = $this->helper->FindSize($p1);
-
-
-        $data['type'] = 'static';
-        $gallerys[] = DOKU_INC.'data/media/'.trim($params['gallery']);
-        $images = helper_plugin_fksimageshow::GetAllImages($gallerys);
-        $data['images'] = helper_plugin_fksimageshow::ChooseImages($images,1,null,$label,$href);
-        if($data['images']){
-            unset($data['href']);
-            unset($data['label']);
-        }
-
         return array($state,array($data));
     }
 
     public function render($mode,Doku_Renderer &$renderer,$data) {
 
-        $this->helper->render($mode,$renderer,$data);
+
+        global $ID;
+
+        if($mode == 'xhtml'){
+
+            /** @var Do ku_Renderer_xhtml $renderer */
+            list($state,$matches) = $data;
+            list($data) = $matches;
+            $param = array('class' => 'FKS_image_show imagelink il','data-animate' => 'static');
+            $param['class'].=' '.implode(' ',$data['size']);
+            $img_size = $data['size']['w'] ? ($data['size']['w'] * 2) : 240;
+            switch ($data['position']) {
+                case "left":
+                    $param['class'].=' left';
+                    break;
+                case "right":
+                    $param['class'].=' right';
+                    break;
+                default :
+                    $param['class'].=' center';
+                    break;
+            }
+
+            if($data['image'] == null){
+                $renderer->nocache();
+                if(auth_quickaclcheck($ID) >= AUTH_EDIT){
+                    $renderer->nocache();
+                    $renderer->doc.='<div class="info">FKS_imageshow: No images find</div>';
+                }
+                if($data['href']){
+                    $rend = new syntax_plugin_fksimageshow_fl();
+                    $rend->render($mode,$renderer,array($state,$data['href'],$data['label']));
+                }
+            }else{
+
+                $renderer->doc .=$this->helper->printIlImageDiv($data['image']['id'],$data['label'],$data['href'],$img_size,$param);
+            }
+        }
 
         return false;
     }

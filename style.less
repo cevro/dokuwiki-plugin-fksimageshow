@@ -1,7 +1,3 @@
-/**
-*    Created on : Nov 30, 2014, 2:50:38 PM
-*   Author     : Michal Červeňák <miso@fykos.cz>
-*/
 
 
 @media  (max-width:419px){
@@ -10,7 +6,7 @@
             width:100%;
             .images{
                 height: 300px;
-                h2{
+                .title span{
                     font-size: 200%;
                 }
             }
@@ -23,8 +19,8 @@
             width:100%;
             .images{
                 height: 300px;
-                h2{
-                    font-size: 200%;
+                .title span{
+                    font-size: 200%!important;
                 }
             }
         }        
@@ -32,15 +28,34 @@
             width:50%;
             .images{
                 height: 150px;
-                h2{
-                    font-size: 150%;
+                .title span{
+                    font-size: 150%!important;
                 }
             }
         }
     }
 }
 @media (min-width:600px){
+    .FKS_image_show.wrap {
+        display:flex;
+        justify-content:space-around;
+        flex-wrap:wrap;
+        .FKS_image_show{
+
+        }
+    }
+
+}
+@media (min-width:600px){
     .FKS_image_show{
+        &.il.default{
+
+            width: 240px; 
+            height: 240px;
+            .images .title span{
+                font-size: 2.3em;
+            }
+        }
         &.w_tera{
             width:100%;            
         }
@@ -72,64 +87,68 @@
 }
 @media (min-width:600px){
     .FKS_image_show{
-        &.h_tera .images{
+        &.h_tera {
             height: 600px;
-            h2{
-                font-size: 200%;
+            .images .title span{
+                font-size: 3.3em;
             }
         }
-        &.h_giga .images{
+        &.h_giga {
             height: 480px;
-            h2{
-                font-size: 180%;
+            .images .title span{
+                font-size: 3.0em;
             }
         }
-        &.h_mega .images{
+        &.h_mega {
             height: 400px;
-            h2{
-                font-size: 166%;
+            .images .title span{
+                font-size: 2.7em;
             }
         }
-        &.h_kilo .images{
+        &.h_kilo {
             height: 360px;
-            h2{
-                font-size: 160%;
+            .images .title span{
+                font-size: 2.5em;
             }
         }
-        &.h_normal .images{
+        &.h_normal {
             height: 300px;
-            h2{
-                font-size: 150%;
+            .images .title span{
+                font-size: 2.3em;
             }
         }
-        &.h_mili .images{
+        &.h_mili {
             height: 240px;
-            h2{
-                font-size: 140%;
+            .images .title span{
+                font-size: 1.9em;
             }
         }
-        &.h_mikro .images{
+        &.h_mikro {
             height: 200px;  
-            h2{
-                font-size: 133%;
+            .images .title span{
+                font-size: 1.7em;
             }
         }
-        &.h_nano .images{
+        &.h_nano {
             height: 150px; 
-            h2{
-                font-size: 125%;
+            .images .title span{
+                font-size: 1.5em;
             }
         }
-        &.h_piko .images{
+        &.h_piko {
             height: 120px; 
-            h2{
-                font-size: 120%;
+            .images .title span{
+                font-size: 1.3em;
             }
         }
     }
 }
 .FKS_image_show{
-    padding:0;
+    &,*{
+        box-sizing: border-box;
+    }
+    padding:.5em;
+    overflow: hidden;
     &.left{
         float:left;
     }
@@ -140,43 +159,72 @@
         margin-left: auto;
         margin-right: auto;
     }
-    .image_show{
-        padding:0.5em;
-        overflow:hidden;
-        .images{
-            margin-top: -1em;
-            position:relative;
-            .image{
-                background-size: cover;
-                background-position-y:50%;
-                height: 100%;
-                width: 100%;
-            }
-            .title{    
-                background-image: linear-gradient(fade(@ini_text_alt,50%), fade(@ini_text_alt,100%) );                
-                position:absolute; 
-                bottom:0;
-                width: 100%;
-                h2{
-                    p{
-                        margin-bottom: 1em;
-                        margin-top: 1em;
-                        text-align: center;
-                    }
-                    color:__background__ !important;
-                    //margin-top:.5em;
-                    margin:0px;
-                    padding-left: .5em;
-                    padding-right: .5em;
-                }
-                
-                
-            }
-            &:hover{ 
-                .title{
-                    background-image: linear-gradient(fade(darken(@ini_text_alt,10%),50%), fade(darken(@ini_text_alt,10%),100%) );
-                }
-            }
+
+    .images{        
+        .image{
+            background-size: cover;
+            background-position-y:50%;
+            height: 100%;
+            width: 100%;
         }
+        .title{   
+
+            &>span{
+
+                display: inline-block;
+                padding-left: .5em;
+
+            }
+
+            span.icon{
+                content: url(images/href.svg); 
+            }
+            span.label{
+                &:empty{
+                    display: none;
+                } 
+                padding: .25em;
+                font-weight: bold;              
+                color:@ini_background !important;
+                margin:0;             
+            }
+
+            position:absolute;
+            background-color: @ini_text_alt;
+            bottom:0;            
+            height: inherit;
+
+            width: 100%;               
+
+        }
+        &:hover{ 
+
+            opacity:.9;
+            transition-duration: 200ms;  
+
+        }
+        width: 100%;
+        height: 100%;
+        position:relative;
+        opacity:1;
     }
+}
+
+button.fast_link{
+    &:hover,&:active{
+        background-color: @ini_text_alt;
+        background-image: linear-gradient(to bottom, lighten(@ini_text_alt,30%),lighten(@ini_text_alt,10%)); 
+
+    }
+    border: none;
+    font-weight: bold;
+    width: 100%;
+    background-color: @ini_text_alt;
+    background-image: linear-gradient(to bottom, @ini_text_alt,darken(@ini_text_alt,20%));
+    color:white;
+    padding: 1em;
+    cursor: pointer;
+    margin-bottom: 1em;
+
+
 }
