@@ -13,12 +13,14 @@ require_once(DOKU_INC.'inc/JpegMeta.php');
 
 class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
 
-    private static $size_names;
+    /**
+     *
+     * @var helper_plugin_fksimageshow 
+     */
     private $helper;
 
     public function __construct() {
         $this->helper = $this->loadHelper('fksimageshow');
-        self::$size_names = $this->helper->size_names;
     }
 
     public function getType() {
@@ -38,7 +40,7 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
     }
 
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('\{\{[a-zX-]*il\>.+?\}\}',$mode,'plugin_fksimageshow_il');
+        $this->Lexer->addSpecialPattern('\{\{il\>.+?\}\}',$mode,'plugin_fksimageshow_il');
     }
 
     /**
@@ -46,26 +48,30 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
      */
     public function handle($match,$state) {
         $matches = array();
-        preg_match('/\{\{(([Xa-z]*)-)?il\>(.+?)\}\}/',$match,$matches);
-        list(,,$p1,$p) = $matches;
+        preg_match('/\{\{il\>(.+?)\}\}/',$match,$matches);
+        list(,$p) = $matches;
         $data = $this->helper->parseIlData($p);
-        $data['size'] = $this->helper->FindSize($p1);
         return array($state,array($data));
     }
 
     public function render($mode,Doku_Renderer &$renderer,$data) {
-
-
         global $ID;
-
         if($mode == 'xhtml'){
 
             /** @var Do ku_Renderer_xhtml $renderer */
             list($state,$matches) = $data;
             list($data) = $matches;
-            $param = array('class' => 'FKS_image_show imagelink il','data-animate' => 'static');
-            $param['class'].=' '.implode(' ',$data['size']);
-            $img_size = $data['size']['w'] ? ($data['size']['w'] * 2) : 240;
+
+            $param = array('class' => 'imageShow imagelink');
+
+            if(!page_exists($data['href'])){
+                if(auth_quickaclcheck($ID) >= AUTH_EDIT){
+                    $renderer->nocache();
+                    msg('page not exist: '.$data['href'],-1,null,null,MSG_EDIT);
+                    $param['class'].=' naught';
+                }
+            }
+            $img_size = 360;
             switch ($data['position']) {
                 case "left":
                     $param['class'].=' left';
@@ -77,17 +83,9 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
                     $param['class'].=' center';
                     break;
             }
-
             if($data['image'] == null){
                 $renderer->nocache();
-                if(auth_quickaclcheck($ID) >= AUTH_EDIT){
-                    $renderer->nocache();
-                    $renderer->doc.='<div class="info">FKS_imageshow: No images find</div>';
-                }
-                if($data['href']){
-                    $rend = new syntax_plugin_fksimageshow_fl();
-                    $rend->render($mode,$renderer,array($state,$data['href'],$data['label']));
-                }
+                $renderer->doc .='<a href="'.(preg_match('|^http[s]?://|',trim($data['href'])) ? htmlspecialchars($data['href']) : wl(cleanID($data['href']))).'">'.htmlspecialchars($data['label']).'</a>';
             }else{
 
                 $renderer->doc .=$this->helper->printIlImageDiv($data['image']['id'],$data['label'],$data['href'],$img_size,$param);

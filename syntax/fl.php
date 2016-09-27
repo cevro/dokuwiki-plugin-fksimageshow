@@ -51,9 +51,9 @@ class syntax_plugin_fksimageshow_fl extends DokuWiki_Syntax_Plugin {
 
             $renderer->doc.='<div class="clearer"></div>';
             $renderer->doc.='<a href="'.wl(cleanID($link)).'">';
-            $renderer->doc.='<button class="fast_link">';
+            $renderer->doc.='<span class="button fast_link">';
             $renderer->doc.=htmlspecialchars(trim($text));
-            $renderer->doc.='</button>';
+            $renderer->doc.='</span>';
             $renderer->doc.='</a>';
            
             return true  ;

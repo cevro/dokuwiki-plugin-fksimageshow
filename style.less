@@ -1,154 +1,30 @@
-
-
-@media  (max-width:419px){
-    .FKS_image_show{
-        &.w_tera,&.w_giga,&.w_mega,&.w_kilo,&.w_normal,&.w_mili,&.w_mikro,&.w_nano,&.w_piko{
-            width:100%;
-            .images{
-                height: 300px;
-                .title span{
-                    font-size: 200%;
-                }
-            }
-        }
-    }
-}
-@media  (min-width:420px)and(max-width:599px){
-    .FKS_image_show{
-        &.w_tera,&.w_giga,&.w_mega,&.w_kilo{
-            width:100%;
-            .images{
-                height: 300px;
-                .title span{
-                    font-size: 200%!important;
-                }
-            }
-        }        
-        &.w_normal,&.w_mili,&.w_mikro,&.w_nano,&.w_piko{
-            width:50%;
-            .images{
-                height: 150px;
-                .title span{
-                    font-size: 150%!important;
-                }
-            }
-        }
-    }
-}
-@media (min-width:600px){
-    .FKS_image_show.wrap {
-        display:flex;
-        justify-content:space-around;
-        flex-wrap:wrap;
-        .FKS_image_show{
-
-        }
-    }
-
-}
-@media (min-width:600px){
-    .FKS_image_show{
-        &.il.default{
-
-            width: 240px; 
-            height: 240px;
-            .images .title span{
-                font-size: 2.3em;
-            }
-        }
-        &.w_tera{
-            width:100%;            
-        }
-        &.w_giga{
-            width:80%;            
-        }
-        &.w_mega{
-            width:66.66666%;           
-        }
-        &.w_kilo{
-            width:60%;            
-        }
-        &.w_normal{
-            width:50%;            
-        }
-        &.w_mili{
-            width:40%;            
-        }
-        &.w_mikro{
-            width:33.3333333%;            
-        }
-        &.w_nano{
-            width:25%;
-        }
-        &.w_piko{
-            width:20%;           
-        }
-    }
-}
-@media (min-width:600px){
-    .FKS_image_show{
-        &.h_tera {
-            height: 600px;
-            .images .title span{
-                font-size: 3.3em;
-            }
-        }
-        &.h_giga {
-            height: 480px;
-            .images .title span{
-                font-size: 3.0em;
-            }
-        }
-        &.h_mega {
-            height: 400px;
-            .images .title span{
-                font-size: 2.7em;
-            }
-        }
-        &.h_kilo {
-            height: 360px;
-            .images .title span{
-                font-size: 2.5em;
-            }
-        }
-        &.h_normal {
-            height: 300px;
-            .images .title span{
-                font-size: 2.3em;
-            }
-        }
-        &.h_mili {
-            height: 240px;
-            .images .title span{
-                font-size: 1.9em;
-            }
-        }
-        &.h_mikro {
-            height: 200px;  
-            .images .title span{
-                font-size: 1.7em;
-            }
-        }
-        &.h_nano {
-            height: 150px; 
-            .images .title span{
-                font-size: 1.5em;
-            }
-        }
-        &.h_piko {
-            height: 120px; 
-            .images .title span{
-                font-size: 1.3em;
-            }
-        }
-    }
-}
-.FKS_image_show{
+.imageShow{
     &,*{
         box-sizing: border-box;
     }
+    .title{
+        span.label{
+            padding: .25em;
+            font-weight: bold;              
+            color:@ini_background !important;
+            margin:0;             
+        }
+        position:absolute;
+        background-color: @ini_text_alt;
+        bottom:0;            
+        height: inherit;
+        width: 100%;  
+        font-size: 2.3em;
+    }
+    width: 50%;
+    height: 240px;
     padding:.5em;
     overflow: hidden;
+    transition-duration: 500ms;
+    &:hover{
+        transform:rotate(0deg)!important;
+        transition-duration: 500ms;
+    }
     &.left{
         float:left;
     }
@@ -159,72 +35,33 @@
         margin-left: auto;
         margin-right: auto;
     }
-
-    .images{        
+    .image-container{    
+        &:hover .title{
+            background-color: darken(@ini_text_alt,20%);
+        }
         .image{
             background-size: cover;
             background-position-y:50%;
             height: 100%;
             width: 100%;
-        }
-        .title{   
-
-            &>span{
-
-                display: inline-block;
-                padding-left: .5em;
-
-            }
-
-            span.icon{
-                content: url(images/href.svg); 
-            }
-            span.label{
-                &:empty{
-                    display: none;
-                } 
-                padding: .25em;
-                font-weight: bold;              
-                color:@ini_background !important;
-                margin:0;             
-            }
-
-            position:absolute;
-            background-color: @ini_text_alt;
-            bottom:0;            
-            height: inherit;
-
-            width: 100%;               
-
-        }
-        &:hover{ 
-
-            opacity:.9;
-            transition-duration: 200ms;  
-
-        }
+        }            
         width: 100%;
         height: 100%;
         position:relative;
-        opacity:1;
     }
 }
-
-button.fast_link{
-    &:hover,&:active{
-        background-color: @ini_text_alt;
-        background-image: linear-gradient(to bottom, lighten(@ini_text_alt,30%),lighten(@ini_text_alt,10%)); 
-
+.imageShowWrap{
+    .imageShow{
+        margin: 2em;
+        width: 300px; 
+        height: 300px;
     }
-    border: none;
-    font-weight: bold;
+    display: flex;
+    justify-content: space-around;
     width: 100%;
-    background-color: @ini_text_alt;
-    background-image: linear-gradient(to bottom, @ini_text_alt,darken(@ini_text_alt,20%));
-    color:white;
-    padding: 1em;
+    flex-wrap: wrap;
+}
+button.fast_link{
+    width: 100%;
     cursor: pointer;
-    margin-bottom: 1em;
-
-
 }
