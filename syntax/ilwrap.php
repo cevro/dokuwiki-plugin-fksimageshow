@@ -12,7 +12,9 @@ require_once(DOKU_INC.'inc/search.php');
 require_once(DOKU_INC.'inc/JpegMeta.php');
 
 class syntax_plugin_fksimageshow_ilwrap extends DokuWiki_Syntax_Plugin {
-
+    /**
+     * @var helper_plugin_fksimageshow
+     */
     private $helper;
 
     public function __construct() {
@@ -40,9 +42,6 @@ class syntax_plugin_fksimageshow_ilwrap extends DokuWiki_Syntax_Plugin {
         $this->Lexer->addSpecialPattern('\{\{il-wrap\>.+?\}\}',$mode,'plugin_fksimageshow_ilwrap');
     }
 
-    /**
-     * Handle the match
-     */
     public function handle($match,$state) {
         $matches = array();
         preg_match('/{{il-wrap>([\S\s]+)*}}/',$match,$matches);
@@ -58,11 +57,9 @@ class syntax_plugin_fksimageshow_ilwrap extends DokuWiki_Syntax_Plugin {
         return array($state,array($datas));
     }
 
-    public function render($mode,Doku_Renderer &$renderer,$data) {
+    public function render($mode,Doku_Renderer $renderer,$data) {
         if($mode == 'xhtml'){
-
-            /** @var Do ku_Renderer_xhtml $renderer */
-            list($state,$matches) = $data;
+            list(,$matches) = $data;
             list($datas) = $matches;
             $renderer->doc.='<div class="imageShowWrap">';
             foreach ($datas as $data) {
@@ -72,10 +69,6 @@ class syntax_plugin_fksimageshow_ilwrap extends DokuWiki_Syntax_Plugin {
             }
             $renderer->doc.='</div>';
         }
-
-
-
         return false;
     }
-
 }
