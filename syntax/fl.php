@@ -20,7 +20,7 @@ class syntax_plugin_fksimageshow_fl extends DokuWiki_Syntax_Plugin {
     }
 
     public function getAllowedTypes() {
-        return array('formatting','substition','disabled');
+        return array();
     }
 
     public function getSort() {
@@ -32,35 +32,23 @@ class syntax_plugin_fksimageshow_fl extends DokuWiki_Syntax_Plugin {
         $this->Lexer->addSpecialPattern('{{fl>.+?\|.+?}}',$mode,'plugin_fksimageshow_fl');
     }
 
-    /**
-     * Handle the match
-     */
     public function handle($match,$state) {
-        
         preg_match('/{{\s*fl\s*>(.*)\|(.*)}}/',$match,$matches);
-       
         list(,$link,$text) = $matches;
-
         return array($state,$link,$text);
     }
 
-    public function render($mode,Doku_Renderer &$renderer,$data) {
+    public function render($mode,Doku_Renderer $renderer,$data) {
 
         if($mode == 'xhtml'){
-            list($state,$link,$text) = $data;
-
-            $renderer->doc.='<div class="clearer"></div>';
+            list(,$link,$text) = $data;
             $renderer->doc.='<a href="'.wl(cleanID($link)).'">';
             $renderer->doc.='<span class="button fast_link">';
             $renderer->doc.=htmlspecialchars(trim($text));
             $renderer->doc.='</span>';
             $renderer->doc.='</a>';
-           
             return true  ;
         }
         return false;
-
-        
     }
-
 }

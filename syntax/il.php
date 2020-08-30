@@ -15,7 +15,7 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
 
     /**
      *
-     * @var helper_plugin_fksimageshow 
+     * @var helper_plugin_fksimageshow
      */
     private $helper;
 
@@ -32,7 +32,7 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
     }
 
     public function getAllowedTypes() {
-        return array();
+        return [];
     }
 
     public function getSort() {
@@ -43,23 +43,19 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
         $this->Lexer->addSpecialPattern('\{\{il\>.+?\}\}',$mode,'plugin_fksimageshow_il');
     }
 
-    /**
-     * Handle the match
-     */
     public function handle($match,$state) {
-        $matches = array();
+        $matches = [];
         preg_match('/\{\{il\>(.+?)\}\}/',$match,$matches);
         list(,$p) = $matches;
         $data = $this->helper->parseIlData($p);
-        return array($state,array($data));
+        return array($state,[$data]);
     }
 
-    public function render($mode,Doku_Renderer &$renderer,$data) {
+    public function render($mode,Doku_Renderer $renderer,$data) {
         global $ID;
         if($mode == 'xhtml'){
 
-            /** @var Do ku_Renderer_xhtml $renderer */
-            list($state,$matches) = $data;
+            list(,$matches) = $data;
             list($data) = $matches;
 
             $param = array('class' => 'imageShow imagelink');
@@ -87,12 +83,9 @@ class syntax_plugin_fksimageshow_il extends DokuWiki_Syntax_Plugin {
                 $renderer->nocache();
                 $renderer->doc .='<a href="'.(preg_match('|^http[s]?://|',trim($data['href'])) ? htmlspecialchars($data['href']) : wl(cleanID($data['href']))).'">'.htmlspecialchars($data['label']).'</a>';
             }else{
-
                 $renderer->doc .=$this->helper->printIlImageDiv($data['image']['id'],$data['label'],$data['href'],$img_size,$param);
             }
         }
-
         return false;
     }
-
 }
